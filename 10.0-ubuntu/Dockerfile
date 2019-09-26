@@ -38,7 +38,7 @@ RUN set -x; \
 
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 10.0
-ENV ODOO_RELEASE=20190925
+ENV ODOO_RELEASE=20190926
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -74,7 +74,7 @@ RUN mkdir /addons \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
-    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo
+    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 

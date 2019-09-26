@@ -74,7 +74,7 @@ RUN mkdir /addons \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
-    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo
+    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 
