@@ -36,3 +36,9 @@ This project is still in heavy development, and updating the image may result in
 things so consider yourself warned if something stop suddenly working when updating the image.
 
 Until the development gets more stable, consider trying it out in test before pulling new images.
+
+
+How to build new images:
+========================
+
+Run the script `build.py` to generate the Dockerfile based on the versions.toml file.
