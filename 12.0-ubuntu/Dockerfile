@@ -52,6 +52,7 @@ RUN set -x; \
             libldap2-dev \
         && pip3 install \
             psycogreen \
+            num2words \
         && pip3 install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
@@ -65,8 +66,8 @@ RUN set -x; \
 VOLUME /etc/odoo
 VOLUME /var/lib/odoo
 
-COPY ./odoo.conf /etc/odoo/
-COPY ./entrypoint.py /
+COPY ../assets/odoo.conf /etc/odoo/
+COPY ../assets/entrypoint.py /
 
 RUN mkdir /addons \
     && groupadd -r -g 109 odoo \

@@ -64,12 +64,7 @@ RUN useradd -b /var/lib -m odoo
 # Copy entrypoint script and Odoo configuration file
 COPY ./odoo.conf /etc/odoo/
 COPY ./entrypoint.sh /
-RUN chown odoo /etc/odoo/odoo.conf
-
-# Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
-RUN mkdir -p /mnt/extra-addons \
-        && chown -R odoo /mnt/extra-addons
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
+RUN chown odoo /etc/odoo/odoo
 
 # Expose Odoo services
 EXPOSE 8069 8071
