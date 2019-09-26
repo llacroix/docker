@@ -10,13 +10,16 @@
 [odoo."8.0-ubuntu"]
     version = "8.0"
     release = "20171001"
+    template = "Dockerfile27.template"
 
 [odoo."9.0-ubuntu"]
     version = "9.0"
     release = "20190424"
+    template = "Dockerfile27.template"
 
 [odoo."10.0-ubuntu"]
     version = "10.0"
+    template = "Dockerfile27.template"
 
 [odoo."11.0-ubuntu"]
     version = "11.0"

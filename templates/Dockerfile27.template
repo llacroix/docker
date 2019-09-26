@@ -8,20 +8,16 @@ ENV LANG C.UTF-8
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
-            python3-wheel \
-            python3-setuptools \
-            python3-pip \
-            python3.7 \
-            libpython3.7 \
+            python-wheel \
+            python-setuptools \
+            python-pip \
+            python2.7 \
+            libpython2.7 \
             curl \
             gnupg \
             libpq-dev \
             libsasl2-2 \
             libldap-2.4-2 \
-        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
-        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
-        && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
-        && update-alternatives --install /usr/bin/pip pip3 /usr/bin/pip3 1 \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb\
         && apt-get -y install -f --no-install-recommends \
@@ -43,22 +39,22 @@ RUN set -x; \
 # Install Odoo Including things from sources
 ENV ODOO_VERSION %(version)s
 ENV ODOO_RELEASE=%(release)s
-ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.post${ODOO_RELEASE}.tar.gz
+ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
             build-essential \
-            python3.7-dev \
+            python2.7-dev \
             libsasl2-dev \
             libldap2-dev %(apt_packages)s \
-        && pip3 install \
+        && pip install \
             psycogreen \
             num2words %(pip_packages)s \
-        && pip3 install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
-            python3.7-dev \
+            python2.7-dev \
             libsasl2-dev \
             libldap2-dev \
         && apt-get autoremove -y \
@@ -77,7 +73,8 @@ RUN mkdir /addons \
     && groupadd -r -g ${GID} odoo \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
-    && chown -R odoo:odoo /addons
+    && chown -R odoo:odoo /addons \
+    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 

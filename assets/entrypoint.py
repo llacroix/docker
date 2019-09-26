@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import argparse
 import time
 import os
@@ -7,6 +7,22 @@ import subprocess
 import sys
 import glob
 import pip
+import re
+
+try:
+    quote = shlex.quote
+except Exception as exc:
+    def quote(s):
+        """Return a shell-escaped version of the string *s*."""
+        _find_unsafe = re.compile(r'[^\w@%+=:,./-]').search
+        if not s:
+            return "''"
+        if _find_unsafe(s) is None:
+            return s
+
+        # use single quotes, and put single quotes into double quotes
+        # the string $'b is then quoted as '$'"'"'b'
+        return "'" + s.replace("'", "'\"'\"'") + "'"
 
 
 def pipe(args):
@@ -80,7 +96,7 @@ def start():
     Main process running odoo
     """
     quoted_args = [
-        shlex.quote(arg)
+        quote(arg)
         for arg in sys.argv[1:]
     ] or ["true"]
     username = "odoo"
@@ -96,6 +112,12 @@ def main():
     return start()
 
 
-code = main()
-
-sys.exit(code)
+try:
+    code = main()
+    sys.exit(code)
+except Exception as exc:
+    print(exc.message)
+    sys.exit(1)
+except KeyboardInterrupt as exc:
+    print(exc.message)
+    sys.exit(1)
