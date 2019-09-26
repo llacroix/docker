@@ -104,13 +104,17 @@ def start():
     # Run the command as odoo while everything is quoted
     return pipe(["su", username, "-c", " ".join(quoted_args)])
 
+def fix_access_rights():
+    pipe(["chown", "odoo:odoo", "/var/lib/odoo"])
+    pipe(["chown", "odoo:odoo", "/etc/odoo"])
+
 
 def main():
     install_apt_packages()
     install_python_dependencies()
     load_secrets()
+    fix_access_rights()
     return start()
-
 
 try:
     code = main()
