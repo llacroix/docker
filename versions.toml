@@ -1,0 +1,28 @@
+[defaults]
+    gid = 1000
+    uid = 1000
+    pip_packages = ""
+    apt_packages = ""
+    template = "Dockerfile.template"
+    config = "odoo.conf"
+    entrypoint = "entrypoint.py"
+
+[odoo."8.0-ubuntu"]
+    version = "8.0"
+    release = "20171001"
+
+[odoo."9.0-ubuntu"]
+    version = "9.0"
+    release = "20190424"
+
+[odoo."10.0-ubuntu"]
+    version = "10.0"
+
+[odoo."11.0-ubuntu"]
+    version = "11.0"
+
+[odoo."12.0-ubuntu"]
+    version = "12.0"
+
+[odoo."13.0-ubuntu"]
+    version = "13.0"

@@ -1,0 +1,85 @@
+FROM ubuntu:bionic
+LABEL maintainer="Archeti <info@archeti.ca>"
+
+# Generate locale C.UTF-8 for postgres and general locale data
+ENV LANG C.UTF-8
+
+# Install some dependencies python3.7
+RUN set -x; \
+        apt-get update \
+        && apt-get install -y --no-install-recommends \
+            python3-wheel \
+            python3-setuptools \
+            python3-pip \
+            python3.7 \
+            libpython3.7 \
+            curl \
+            gnupg \
+            libpq-dev \
+            libsasl2-2 \
+            libldap-2.4-2 \
+        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
+        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
+        && update-alternatives --install /usr/bin/pip pip3 /usr/bin/pip3 1 \
+        && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
+        && dpkg --force-depends -i wkhtmltox.deb\
+        && apt-get -y install -f --no-install-recommends \
+        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
+
+# Install latest postgresql-client
+RUN set -x; \
+        echo 'deb https://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' > etc/apt/sources.list.d/pgdg.list \
+        && export GNUPGHOME="$(mktemp -d)" \
+        && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
+        && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
+        && gpg --armor --export "${repokey}" | apt-key add - \
+        && gpgconf --kill all \
+        && rm -rf "$GNUPGHOME" \
+        && apt-get update  \
+        && apt-get install -y postgresql-client \
+        && rm -rf /var/lib/apt/lists/*
+
+# Install Odoo Including things from sources
+ENV ODOO_VERSION %(version)s
+ENV ODOO_RELEASE=%(release)s
+ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.post${ODOO_RELEASE}.tar.gz
+RUN set -x; \
+        apt-get update \
+        && apt-get install -y --no-install-recommends \
+            build-essential \
+            python3.7-dev \
+            libsasl2-dev \
+            libldap2-dev %(apt_packages)s \
+        && pip3 install \
+            psycogreen \
+            num2words %(pip_packages)s \
+        && pip3 install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && cd / \
+        && apt-get --purge remove -y \
+            build-essential \
+            python3.7-dev \
+            libsasl2-dev \
+            libldap2-dev \
+        && apt-get autoremove -y \
+        && rm -rf /var/lib/apt/lists/*
+
+VOLUME /etc/odoo
+VOLUME /var/lib/odoo
+
+COPY ../assets/%(config)s /etc/odoo/
+COPY ../assets/%(entrypoint)s /
+
+ARG UID=%(uid)d
+ARG GID=%(gid)d
+
+RUN mkdir /addons \
+    && groupadd -r -g ${GID} odoo \
+    && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
+    && chown odoo /etc/odoo/odoo.conf \
+    && chown -R odoo:odoo /addons
+
+ENV ODOO_RC /etc/odoo/odoo.conf
+
+ENTRYPOINT ["/entrypoint.py"]
+
+cmd ["odoo"]
