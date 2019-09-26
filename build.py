@@ -59,3 +59,5 @@ for tag in tags:
     if path.exists(tag):
         shutil.rmtree(tag)
     shutil.move(path.join("build", tag), ".")
+
+shutil.rmtree("build")

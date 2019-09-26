@@ -29,3 +29,26 @@
 
 [odoo."13.0-ubuntu"]
     version = "13.0"
+
+[odoo."8.0"]
+    version = "8.0"
+    release = "20171001"
+    template = "Dockerfile27.template"
+
+[odoo."9.0"]
+    version = "9.0"
+    release = "20190424"
+    template = "Dockerfile27.template"
+
+[odoo."10.0"]
+    version = "10.0"
+    template = "Dockerfile27.template"
+
+[odoo."11.0"]
+    version = "11.0"
+
+[odoo."12.0"]
+    version = "12.0"
+
+[odoo."13.0"]
+    version = "13.0"

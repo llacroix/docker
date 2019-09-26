@@ -1,74 +1,83 @@
-FROM debian:jessie
-LABEL maintainer="Odoo S.A. <info@odoo.com>"
+FROM ubuntu:bionic
+LABEL maintainer="Archeti <info@archeti.ca>"
 
-# Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
+# Generate locale C.UTF-8 for postgres and general locale data
+ENV LANG C.UTF-8
+
+# Install some dependencies python3.7
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
-            ca-certificates \
-            curl \
-            dirmngr \
-            node-less \
-            python-gevent \
-            python-ldap \
+            python-wheel \
+            python-setuptools \
             python-pip \
-            python-qrcode \
-            python-renderpm \
-            python-support \
-            python-vobject \
-            python-watchdog \
-            netcat \
-        && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.jessie_amd64.deb \
-        && echo '4d104ff338dc2d2083457b3b1e9baab8ddf14202 wkhtmltox.deb' | sha1sum -c - \
-        && dpkg --force-depends -i wkhtmltox.deb \
+            python2.7 \
+            libpython2.7 \
+            curl \
+            gnupg \
+            libpq-dev \
+            libsasl2-2 \
+            libldap-2.4-2 \
+        && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
+        && dpkg --force-depends -i wkhtmltox.deb\
         && apt-get -y install -f --no-install-recommends \
-        && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false npm \
-        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb \
-        && pip install psycogreen==1.0
+        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
+# Install latest postgresql-client
 RUN set -x; \
-       pip install remote-pdb
-
-# install latest postgresql-client
-RUN set -x; \
-        echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' > etc/apt/sources.list.d/pgdg.list \
+        echo 'deb https://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' > etc/apt/sources.list.d/pgdg.list \
         && export GNUPGHOME="$(mktemp -d)" \
         && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
         && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
         && gpg --armor --export "${repokey}" | apt-key add - \
+        && gpgconf --kill all \
         && rm -rf "$GNUPGHOME" \
         && apt-get update  \
         && apt-get install -y postgresql-client \
         && rm -rf /var/lib/apt/lists/*
 
-# Install Odoo
+# Install Odoo Including things from sources
 ENV ODOO_VERSION 9.0
-ARG ODOO_RELEASE=20190424
+ENV ODOO_RELEASE=20190424
+ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
-        curl -o odoo.deb -sSL https://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}c.${ODOO_RELEASE}_all.deb \
-        && dpkg --force-depends -i odoo.deb \
-        && apt-get update \
-        && apt-get -y install -f --no-install-recommends \
-        && rm -rf /var/lib/apt/lists/* odoo.deb
+        apt-get update \
+        && apt-get install -y --no-install-recommends \
+            build-essential \
+            python2.7-dev \
+            libsasl2-dev \
+            libldap2-dev  \
+        && pip install \
+            psycogreen \
+            num2words  \
+        && pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && cd / \
+        && apt-get --purge remove -y \
+            build-essential \
+            python2.7-dev \
+            libsasl2-dev \
+            libldap2-dev \
+        && apt-get autoremove -y \
+        && rm -rf /var/lib/apt/lists/*
 
-# Copy entrypoint script and Odoo configuration file
+VOLUME /etc/odoo
+VOLUME /var/lib/odoo
+
 COPY ./odoo.conf /etc/odoo/
-COPY ./entrypoint.sh /
-RUN chown odoo /etc/odoo/odoo.conf
+COPY ./entrypoint.py /
 
-# Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
-RUN mkdir -p /mnt/extra-addons \
-        && chown -R odoo /mnt/extra-addons
-VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
+ARG UID=1000
+ARG GID=1000
 
-# Expose Odoo services
-EXPOSE 8069 8071
+RUN mkdir /addons \
+    && groupadd -r -g ${GID} odoo \
+    && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
+    && chown odoo /etc/odoo/odoo.conf \
+    && chown -R odoo:odoo /addons \
+    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo
 
-# Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf
 
-# Set default user when running the container
-USER odoo
+ENTRYPOINT ["/entrypoint.py"]
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["odoo"]
+cmd ["odoo"]

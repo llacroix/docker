@@ -20,6 +20,7 @@ RUN set -x; \
             libldap-2.4-2 \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
+        && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/pip pip3 /usr/bin/pip3 1 \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb\
@@ -66,8 +67,8 @@ RUN set -x; \
 VOLUME /etc/odoo
 VOLUME /var/lib/odoo
 
-COPY ../assets/odoo.conf /etc/odoo/
-COPY ../assets/entrypoint.py /
+COPY ./odoo.conf /etc/odoo/
+COPY ./entrypoint.py /
 
 ARG UID=1000
 ARG GID=1000
