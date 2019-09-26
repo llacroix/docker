@@ -4,7 +4,7 @@ LABEL maintainer="Archeti <info@archeti.ca>"
 # Generate locale C.UTF-8 for postgres and general locale data
 ENV LANG C.UTF-8
 
-# Install some dependencies python3.7
+# Install some dependencies python3.7 and wkhtmltopdf
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
@@ -40,7 +40,7 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 12.0
+ENV ODOO_VERSION 11.0
 ARG ODOO_RELEASE=20190919
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.post${ODOO_RELEASE}.tar.gz
 RUN set -x; \
