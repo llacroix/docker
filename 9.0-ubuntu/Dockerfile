@@ -1,79 +1,85 @@
-FROM ubuntu:18.04
-LABEL maintainer="Odoo S.A. <info@odoo.com>"
+FROM ubuntu:bionic
+LABEL maintainer="Archeti <info@archeti.ca>"
 
-# Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
+# Generate locale C.UTF-8 for postgres and general locale data
+ENV LANG C.UTF-8
+
+# Install some dependencies python3.7
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
-            ca-certificates \
+            python3-wheel \
+            python3-setuptools \
+            python3-pip \
+            python3.7 \
+            libpython3.7 \
             curl \
-            dirmngr \
-            node-less \
-            python-gevent \
-            python-ldap \
-            python-pip \
-            python-qrcode \
-            python-renderpm \
-            # python-support \
-            python-vobject \
-            python-watchdog \
-            python-setuptools \
-            python-psycopg2 \
-            netcat \
             gnupg \
-            apt-utils \
-        && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.jessie_amd64.deb \
-        && echo '4d104ff338dc2d2083457b3b1e9baab8ddf14202 wkhtmltox.deb' | sha1sum -c - \
-        && dpkg --force-depends -i wkhtmltox.deb \
+            libpq-dev \
+            libsasl2-2 \
+            libldap-2.4-2 \
+        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
+        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
+        && update-alternatives --install /usr/bin/pip pip3 /usr/bin/pip3 1 \
+        && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
+        && dpkg --force-depends -i wkhtmltox.deb\
         && apt-get -y install -f --no-install-recommends \
-        && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false npm \
-        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb \
-        && pip install wheel
+        && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
+# Install latest postgresql-client
 RUN set -x; \
-       pip install remote-pdb psycogreen
-
-# install latest postgresql-client
-RUN set -x; \
-        echo 'deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' > etc/apt/sources.list.d/pgdg.list \
+        echo 'deb https://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' > etc/apt/sources.list.d/pgdg.list \
         && export GNUPGHOME="$(mktemp -d)" \
         && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
         && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
         && gpg --armor --export "${repokey}" | apt-key add - \
+        && gpgconf --kill all \
         && rm -rf "$GNUPGHOME" \
         && apt-get update  \
-        && apt-get install -y postgresql-client libpq-dev \
+        && apt-get install -y postgresql-client \
         && rm -rf /var/lib/apt/lists/*
 
-# Install Odoo
+# Install Odoo Including things from sources
 ENV ODOO_VERSION 9.0
-ARG ODOO_RELEASE=20190424
+ENV ODOO_RELEASE=20190424
+ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.post${ODOO_RELEASE}.tar.gz
 RUN set -x; \
-        curl -o odoo.tar.gz -sSL https://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}c.${ODOO_RELEASE}.tar.gz \
-        && tar xvfz odoo.tar.gz \
-        && apt-get update \
-        && apt-get install -y python-psutil \
-        && cd odoo-${ODOO_RELEASE} \
-        && python setup.py install \
+        apt-get update \
+        && apt-get install -y --no-install-recommends \
+            build-essential \
+            python3.7-dev \
+            libsasl2-dev \
+            libldap2-dev  \
+        && pip3 install \
+            psycogreen \
+            num2words  \
+        && pip3 install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
-        && rm -rf /odoo-${ODOO_RELEASE}
-        # && apt-get -y install -f --no-install-recommends
-        # && rm -rf /var/lib/apt/lists/* odoo.deb
+        && apt-get --purge remove -y \
+            build-essential \
+            python3.7-dev \
+            libsasl2-dev \
+            libldap2-dev \
+        && apt-get autoremove -y \
+        && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -b /var/lib -m odoo
-# Copy entrypoint script and Odoo configuration file
-COPY ./odoo.conf /etc/odoo/
-COPY ./entrypoint.sh /
-RUN chown odoo /etc/odoo/odoo
+VOLUME /etc/odoo
+VOLUME /var/lib/odoo
 
-# Expose Odoo services
-EXPOSE 8069 8071
+COPY ../assets/odoo.conf /etc/odoo/
+COPY ../assets/entrypoint.py /
 
-# Set the default config file
+ARG UID=1000
+ARG GID=1000
+
+RUN mkdir /addons \
+    && groupadd -r -g ${GID} odoo \
+    && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
+    && chown odoo /etc/odoo/odoo.conf \
+    && chown -R odoo:odoo /addons
+
 ENV ODOO_RC /etc/odoo/odoo.conf
 
-# Set default user when running the container
-USER odoo
+ENTRYPOINT ["/entrypoint.py"]
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["odoo"]
+cmd ["odoo"]

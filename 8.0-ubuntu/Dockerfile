@@ -40,8 +40,8 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 11.0
-ENV ODOO_RELEASE=20190925
+ENV ODOO_VERSION 8.0
+ENV ODOO_RELEASE=20171001
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.post${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \

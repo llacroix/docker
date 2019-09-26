@@ -41,7 +41,7 @@ RUN set -x; \
 
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 12.0
-ARG ODOO_RELEASE=20190919
+ENV ODOO_RELEASE=20190925
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.post${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -49,10 +49,10 @@ RUN set -x; \
             build-essential \
             python3.7-dev \
             libsasl2-dev \
-            libldap2-dev \
+            libldap2-dev  \
         && pip3 install \
             psycogreen \
-            num2words \
+            num2words  \
         && pip3 install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
@@ -69,9 +69,12 @@ VOLUME /var/lib/odoo
 COPY ../assets/odoo.conf /etc/odoo/
 COPY ../assets/entrypoint.py /
 
+ARG UID=1000
+ARG GID=1000
+
 RUN mkdir /addons \
-    && groupadd -r -g 109 odoo \
-    && useradd -r -u 105 -g odoo -b /var/lib -m odoo \
+    && groupadd -r -g ${GID} odoo \
+    && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons
 
