@@ -21,8 +21,8 @@ RUN set -x; \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
-        && update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3 1 \
-        && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 \
+        && update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.7 2 \
+        && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2 \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb\
         && apt-get -y install -f --no-install-recommends \
