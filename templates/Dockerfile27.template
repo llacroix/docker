@@ -39,7 +39,7 @@ RUN set -x; \
 # Install Odoo Including things from sources
 ENV ODOO_VERSION %(version)s
 ENV ODOO_RELEASE=%(release)s
-ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
+ARG ODOO_ARCHIVE=%(filename)s.tar.gz
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
@@ -50,7 +50,7 @@ RUN set -x; \
         && pip install \
             psycogreen \
             num2words %(pip_packages)s \
-        && pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && pip install https://nightly.odoo.com/%(version_path)s/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \

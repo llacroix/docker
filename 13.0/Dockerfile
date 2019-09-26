@@ -21,7 +21,8 @@ RUN set -x; \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
-        && update-alternatives --install /usr/bin/pip pip3 /usr/bin/pip3 1 \
+        && update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3 1 \
+        && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb\
         && apt-get -y install -f --no-install-recommends \
@@ -41,9 +42,9 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 13.0
+ENV ODOO_VERSION 13.0alpha1
 ENV ODOO_RELEASE=20190925
-ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.post${ODOO_RELEASE}.tar.gz
+ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
@@ -51,10 +52,10 @@ RUN set -x; \
             python3.7-dev \
             libsasl2-dev \
             libldap2-dev  \
-        && pip3 install \
+        && pip install \
             psycogreen \
             num2words  \
-        && pip3 install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && pip install https://nightly.odoo.com/master/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \

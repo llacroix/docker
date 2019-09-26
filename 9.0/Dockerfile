@@ -37,7 +37,7 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 9.0
+ENV ODOO_VERSION 9.0c
 ENV ODOO_RELEASE=20190424
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
@@ -50,7 +50,7 @@ RUN set -x; \
         && pip install \
             psycogreen \
             num2words  \
-        && pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && pip install https://nightly.odoo.com/9.0/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \

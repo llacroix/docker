@@ -6,6 +6,8 @@
     template = "Dockerfile.template"
     config = "odoo.conf"
     entrypoint = "entrypoint.py"
+    filename = "odoo_${ODOO_VERSION}.${ODOO_RELEASE}"
+    version_path = "${ODOO_VERSION}"
 
 [odoo."8.0-ubuntu"]
     version = "8.0"
@@ -13,7 +15,8 @@
     template = "Dockerfile27.template"
 
 [odoo."9.0-ubuntu"]
-    version = "9.0"
+    version = "9.0c"
+    version_path = "9.0"
     release = "20190424"
     template = "Dockerfile27.template"
 
@@ -28,7 +31,8 @@
     version = "12.0"
 
 [odoo."13.0-ubuntu"]
-    version = "13.0"
+    version = "13.0alpha1"
+    version_path = "master"
 
 [odoo."8.0"]
     version = "8.0"
@@ -36,7 +40,8 @@
     template = "Dockerfile27.template"
 
 [odoo."9.0"]
-    version = "9.0"
+    version = "9.0c"
+    version_path = "9.0"
     release = "20190424"
     template = "Dockerfile27.template"
 
@@ -51,4 +56,5 @@
     version = "12.0"
 
 [odoo."13.0"]
-    version = "13.0"
+    version = "13.0alpha1"
+    version_path = "master"
