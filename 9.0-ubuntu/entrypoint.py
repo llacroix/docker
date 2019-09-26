@@ -105,8 +105,8 @@ def start():
     return pipe(["su", username, "-c", " ".join(quoted_args)])
 
 def fix_access_rights():
-    pipe(["chown", "odoo:odoo", "/var/lib/odoo"])
-    pipe(["chown", "odoo:odoo", "/etc/odoo"])
+    pipe(["chown", "-R", "odoo:odoo", "/var/lib/odoo"])
+    pipe(["chown", "-R", "odoo:odoo", "/etc/odoo"])
 
 
 def main():
