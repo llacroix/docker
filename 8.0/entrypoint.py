@@ -8,6 +8,8 @@ import sys
 import glob
 import pip
 import re
+from os import path
+from os.path import expanduser
 
 try:
     quote = shlex.quote
@@ -88,8 +90,11 @@ def load_secrets():
     # credentials could also be stored in the HOME of the odoo user
     # except we cannot rely on secrets 100% because it only works in
     # swarm mode
-    pass
+    pgpass_secret = '/run/secrets/.pgpass'
+    if path.exists(pgpass_secret):
+        shutil.move(pgpass_secret, path.expanduser('~'))
 
+    odoorc = '/run/secrets/.odoorc'
 
 def start():
     """

@@ -42,3 +42,20 @@ How to build new images:
 ========================
 
 Run the script `build.py` to generate the Dockerfile based on the versions.toml file.
+
+TODO:
+=====
+
+After some changes, I decided to run the entry point as root but it's definitely not a good idea.
+If for some reason something breaks, it could give an attacker root access to the machine easily.
+A better idea would be to grant some access to the odoo user and revoke them later when the 
+container is started.
+
+Something like this:
+    
+    - Container starts with the user in group X
+    - Setup methods are called by using a command that force opening a new session. Calling
+      directly `apt-get install` or `pip` wouldn't give enough rights.
+    - Call a method to revoke group
+    - Start odoo
+    - Any further call to the install commands would raise permission denied.

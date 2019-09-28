@@ -32,9 +32,12 @@ def process_request(t):
     time.sleep(t)
     c.inc()
 
+process_request(3)
+
 if __name__ == '__main__':
     # Start up the server to expose the metrics.
-    start_http_server(8000)
+    #start_http_server(8000)
     # Generate some requests.
-    while True:
-        process_request(random.random())
+    #while True:
+    #    process_request(random.random())
+    pass
