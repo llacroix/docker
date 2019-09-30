@@ -65,6 +65,7 @@ VOLUME /var/lib/odoo
 
 COPY ./odoo.conf /etc/odoo/
 COPY ./entrypoint.py /
+COPY ./sudo-entrypoint.py /
 
 ARG UID=1000
 ARG GID=1000
@@ -74,9 +75,15 @@ RUN mkdir /addons \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
-    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true
+    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true \
+    && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
 
 ENV ODOO_RC /etc/odoo/odoo.conf
+
+expose 8069
+expose 8071
+
+USER odoo
 
 ENTRYPOINT ["/entrypoint.py"]
 

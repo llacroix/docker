@@ -51,7 +51,9 @@ for tag, config in config.get("odoo", {}).items():
 
     shutil.copyfile(path.join("assets", config.get('config')), path.join("build", tag, "odoo.conf"))
     shutil.copyfile(path.join("assets", config.get('entrypoint')), path.join("build", tag, "entrypoint.py"))
+    shutil.copyfile(path.join("assets", 'sudo-%s' % config.get('entrypoint')), path.join("build", tag, "sudo-entrypoint.py"))
     os.chmod(path.join("build", tag, "entrypoint.py"), 0o775)
+    os.chmod(path.join("build", tag, "sudo-entrypoint.py"), 0o775)
 
     tags.append(tag)
 
