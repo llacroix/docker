@@ -90,7 +90,7 @@ def fix_access_rights():
 
 
 def remove_sudo():
-    pipe(["sed", "-i", "/odoo/d", "/etc/sudoers"])
+    return pipe(["sed", "-i", "/odoo/d", "/etc/sudoers"])
 
 
 def main():
@@ -98,4 +98,15 @@ def main():
     install_python_dependencies()
     load_secrets()
     fix_access_rights()
-    remove_sudo() 
+    return remove_sudo() 
+
+
+try:
+    code = main()
+    sys.exit(code)
+except Exception as exc:
+    print(exc.message)
+    sys.exit(1)
+except KeyboardInterrupt as exc:
+    print(exc.message)
+    sys.exit(1)

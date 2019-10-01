@@ -59,7 +59,7 @@ def start():
 
 
 def call_sudo_entrypoint():
-    pipe(["sudo /sudo-entrypoint.py"])
+    pipe(["sudo", "/sudo-entrypoint.py"])
 
 def main():
     ret = call_sudo_entrypoint()
