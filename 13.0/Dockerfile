@@ -19,6 +19,7 @@ RUN set -x; \
             libsasl2-2 \
             libldap-2.4-2 \
             sudo \
+            node-less \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
@@ -43,7 +44,7 @@ RUN set -x; \
 
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 13.0alpha1
-ENV ODOO_RELEASE=20190930
+ENV ODOO_RELEASE=20191001
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \

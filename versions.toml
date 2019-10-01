@@ -19,13 +19,16 @@
     version_path = "9.0"
     release = "20190424"
     template = "Dockerfile27.template"
+    apt_packages = "ruby-sass"
 
 [odoo."10.0"]
     version = "10.0"
     template = "Dockerfile27.template"
+    apt_packages = "ruby-sass"
 
 [odoo."11.0"]
     version = "11.0"
+    apt_packages = "ruby-sass"
 
 [odoo."12.0"]
     version = "12.0"

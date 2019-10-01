@@ -18,6 +18,8 @@ RUN set -x; \
             libpq-dev \
             libsasl2-2 \
             libldap-2.4-2 \
+            sudo \
+            node-less \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb\
         && apt-get -y install -f --no-install-recommends \
