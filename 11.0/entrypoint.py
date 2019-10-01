@@ -55,15 +55,17 @@ def start():
 
     # Run the command as odoo while everything is quoted
     #return pipe(["su", username, "-c", " ".join(quoted_args)])
+    print("Starting odoo", sys.argv)
     return pipe(sys.argv[1:])
 
 
 def call_sudo_entrypoint():
-    pipe(["sudo", "/sudo-entrypoint.py"])
+    ret = pipe(["sudo", "/sudo-entrypoint.py"])
 
 def main():
     ret = call_sudo_entrypoint()
-    if ret != 0:
+    print("Return from sudo", ret)
+    if ret not in [0, None]:
         sys.exit(ret)
     return start()
 
