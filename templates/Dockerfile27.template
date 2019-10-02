@@ -81,6 +81,7 @@ RUN mkdir /addons \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
 
 ENV ODOO_RC /etc/odoo/odoo.conf
+ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
 
 expose 8069
 expose 8071
