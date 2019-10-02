@@ -54,22 +54,6 @@ def install_apt_packages():
             sys.exit(ret)
 
 
-def install_python_dependencies():
-    """
-    Install all the requirements.txt file found
-    """
-    # TODO
-    # https://pypi.org/project/requirements-parser/
-    # to parse all the requirements file to parse all the possible specs
-    # then append the specs to the loaded requirements and dump the requirements.txt
-    # file in /var/lib/odoo/requirements.txt and then install this only file
-    # instead of calling multiple time pip
-    for requirements in glob.glob("/addons/**/requirements.txt"):
-        print("Installing python packages from %s" % requirements)
-        pip.main(['install', '-r', requirements])
-        #pipe(['sudo', 'pip', 'install', '-r', requirements])
-
-
 def load_secrets():
     # TODO add a way to load some secrets so odoo process can
     # use secrets as a way to load passwords/user for postgresql
@@ -95,7 +79,6 @@ def remove_sudo():
 
 def main():
     install_apt_packages()
-    install_python_dependencies()
     load_secrets()
     fix_access_rights()
     return remove_sudo() 

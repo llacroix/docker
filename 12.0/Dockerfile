@@ -44,7 +44,7 @@ RUN set -x; \
 
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 12.0
-ENV ODOO_RELEASE=20191001
+ENV ODOO_RELEASE=20191002
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -84,6 +84,7 @@ RUN mkdir /addons \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
 
 ENV ODOO_RC /etc/odoo/odoo.conf
+ENV ODOO_BASE_PATH /usr/local/lib/python3.7/dist-packages/odoo/addons
 
 expose 8069
 expose 8071

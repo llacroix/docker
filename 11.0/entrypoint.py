@@ -55,18 +55,43 @@ def start():
 
     # Run the command as odoo while everything is quoted
     #return pipe(["su", username, "-c", " ".join(quoted_args)])
+    # TODO parse sys.argv to append addons path if command is odoo
+    # we can introspect /addons/* and env ODOO_BASE_PATH to compute
+    # the right addons path to pass to the process
     print("Starting odoo", sys.argv)
+
     return pipe(sys.argv[1:])
 
 
 def call_sudo_entrypoint():
-    ret = pipe(["sudo", "/sudo-entrypoint.py"])
+    ret = pipe(["sudo", "-H", "/sudo-entrypoint.py"])
+
+
+def install_python_dependencies():
+    """
+    Install all the requirements.txt file found
+    """
+    # TODO
+    # https://pypi.org/project/requirements-parser/
+    # to parse all the requirements file to parse all the possible specs
+    # then append the specs to the loaded requirements and dump the requirements.txt
+    # file in /var/lib/odoo/requirements.txt and then install this only file
+    # instead of calling multiple time pip
+    for requirements in glob.glob("/addons/**/requirements.txt"):
+        print("Installing python packages from %s" % requirements)
+        pip.main(['install', '-r', requirements])
+
 
 def main():
+    # Install apt package first then python packages
     ret = call_sudo_entrypoint()
     print("Return from sudo", ret)
     if ret not in [0, None]:
         sys.exit(ret)
+
+    # Install python packages with pip in user home
+    install_python_dependencies()
+
     return start()
 
 try:
