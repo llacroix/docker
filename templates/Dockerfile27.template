@@ -82,11 +82,17 @@ RUN mkdir /addons \
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
+# Env variable defined to monitor the kind of service running
+# it could be a staging/production/test or anything and undefined
+# is the default in case we need to know servers that aren't correctly
+# defined
+ENV DEPLOYMENT_AREA undefined
 
 expose 8069
 expose 8071
 
 USER odoo
+
 
 ENTRYPOINT ["/entrypoint.py"]
 

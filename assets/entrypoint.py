@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 import argparse
 import time
-import os
 import shlex
 import subprocess
 import sys
 import glob
 import pip
 import re
+import string
+import random
+
+import os
 from os import path
 from os.path import expanduser
 
@@ -82,6 +85,72 @@ def install_python_dependencies():
         pip.main(['install', '-r', requirements])
 
 
+def randomString(stringLength=10):
+    """Generate a random string of fixed length """
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+def install_master_password(config_path):
+    # Secure an odoo instance with a default master password
+    # if required we can update the master password but at least
+    # odoo doesn't get exposed by default without master passwords
+    from passlib.context import CryptContext
+
+    config = configparser.ConfigParser()
+    config.read(config_path)
+
+    master_password_secret = "/run/secrets/master_password"
+    if path.exists(pgpass_secret)
+        with open(master_password_secret, "r") as mp:
+            master_password = mp.read().strip()
+    elif os.environ.get('MASTER_PASSWORD'):
+        master_password = os.environ.get('MASTER_PASSWORD')
+    else:
+        ctx = CryptContext(['pbkdf2_sha512'])
+        master_password = ctx.encrypt(randomString(16))
+
+    config.set('options', 'admin_passwd', master_password)
+
+    with open(config_path, 'w') as out:
+        config.write(out)
+
+def setup_environ(config_path):
+    config = configparser.ConfigParser()
+    config.read(config_path)
+
+    def check_config(config_name, config_small):
+        """
+        Check if config is in odoo_rc or command line
+        """
+        value = None
+
+        if config['options'].get(config_name):
+            value = config['options'].get(config_name)
+
+        if not value and '--%s' % config_name in sys.argv:
+            idx = sys.argv.index('--%s' % config_name)
+            value = sys.argv[idx+1] if idx < len(sys.argv) else None
+
+        if not value and config_small and '-%s' % config_small in sys.argv:
+            idx = sys.argv.index('-%s' % config_small)
+            value = sys.argv[idx+1] if idx < len(sys.argv) else None
+
+        return value
+
+    variables = [
+        ('PGUSER', 'db_user', 'r'),
+        ('PGHOST', 'db_host', None),
+        ('PGPORT', 'db_port', None),
+        ('PGDATABASE', 'database', 'd')
+    ]
+
+    # Setup basic PG env variables to simplify managements
+    # combined with secret pg pass we can use psql directly
+    for pg_val, odoo_val, small_arg in variables:
+        value = check_config(odoo_val, small_arg)
+        if value:
+            os.environ[pg_val] = value
+
 def main():
     # Install apt package first then python packages
     ret = call_sudo_entrypoint()
@@ -91,6 +160,8 @@ def main():
 
     # Install python packages with pip in user home
     install_python_dependencies()
+    install_master_password(os.environ['ODOO_RC'])
+    setup_environ(os.environ['ODOO_RC'])
 
     return start()
 
