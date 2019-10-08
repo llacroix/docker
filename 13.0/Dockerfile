@@ -43,8 +43,8 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 13.0alpha1
-ENV ODOO_RELEASE=20191007
+ENV ODOO_VERSION 13.0
+ENV ODOO_RELEASE=20191008
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -56,7 +56,7 @@ RUN set -x; \
         && pip install \
             psycogreen \
             num2words  \
-        && pip install https://nightly.odoo.com/master/nightly/src/${ODOO_ARCHIVE} \
+        && pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
@@ -85,6 +85,11 @@ RUN mkdir /addons \
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/python3.7/dist-packages/odoo/addons
+# Env variable defined to monitor the kind of service running
+# it could be a staging/production/test or anything and undefined
+# is the default in case we need to know servers that aren't correctly
+# defined
+ENV DEPLOYMENT_AREA undefined
 
 expose 8069
 expose 8071

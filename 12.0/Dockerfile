@@ -44,7 +44,7 @@ RUN set -x; \
 
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 12.0
-ENV ODOO_RELEASE=20191007
+ENV ODOO_RELEASE=20191008
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -85,6 +85,11 @@ RUN mkdir /addons \
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/python3.7/dist-packages/odoo/addons
+# Env variable defined to monitor the kind of service running
+# it could be a staging/production/test or anything and undefined
+# is the default in case we need to know servers that aren't correctly
+# defined
+ENV DEPLOYMENT_AREA undefined
 
 expose 8069
 expose 8071
