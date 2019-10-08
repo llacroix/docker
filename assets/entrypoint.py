@@ -13,6 +13,7 @@ import random
 import os
 from os import path
 from os.path import expanduser
+import configparser
 
 try:
     quote = shlex.quote
@@ -98,9 +99,10 @@ def install_master_password(config_path):
 
     config = configparser.ConfigParser()
     config.read(config_path)
+    pgpass_secret = path.join(path.expanduser('~'), ".pgpass")
 
     master_password_secret = "/run/secrets/master_password"
-    if path.exists(pgpass_secret)
+    if path.exists(pgpass_secret):
         with open(master_password_secret, "r") as mp:
             master_password = mp.read().strip()
     elif os.environ.get('MASTER_PASSWORD'):
