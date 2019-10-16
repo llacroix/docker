@@ -83,7 +83,7 @@ RUN mkdir /addons \
 
 ENV OPENERP_SERVER /etc/odoo/odoo.conf
 ENV ODOO_RC /etc/odoo/odoo.conf
-ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
+ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/%(module_name)s/addons
 # Env variable defined to monitor the kind of service running
 # it could be a staging/production/test or anything and undefined
 # is the default in case we need to know servers that aren't correctly
