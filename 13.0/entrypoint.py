@@ -13,7 +13,12 @@ import random
 import os
 from os import path
 from os.path import expanduser
-import configparser
+
+try:
+    from configparser import ConfigParser
+except Exception:
+    from ConfigParser import ConfigParser
+
 
 try:
     quote = shlex.quote
@@ -97,19 +102,25 @@ def install_master_password(config_path):
     # odoo doesn't get exposed by default without master passwords
     from passlib.context import CryptContext
 
-    config = configparser.ConfigParser()
+    ctx = CryptContext(['pbkdf2_sha512', 'plaintext'], deprecated=['plaintext'])
+    config = ConfigParser()
     config.read(config_path)
-    pgpass_secret = path.join(path.expanduser('~'), ".pgpass")
 
     master_password_secret = "/run/secrets/master_password"
-    if path.exists(pgpass_secret):
+    if path.exists(master_password_secret):
         with open(master_password_secret, "r") as mp:
             master_password = mp.read().strip()
     elif os.environ.get('MASTER_PASSWORD'):
         master_password = os.environ.get('MASTER_PASSWORD')
     else:
-        ctx = CryptContext(['pbkdf2_sha512'])
-        master_password = ctx.encrypt(randomString(16))
+        master_password = randomString(64)
+
+    # Check that we don't have plaintext and encrypt it
+    # This allow us to quickly setup servers without having to hash ourselves first
+    # for security reason, you should always hash the password first and not expect
+    # the image to do it correctly
+    if ctx.identify(master_password) == 'plaintext':
+        master_password = ctx.encrypt(master_password)
 
     config.set('options', 'admin_passwd', master_password)
 
@@ -117,7 +128,7 @@ def install_master_password(config_path):
         config.write(out)
 
 def setup_environ(config_path):
-    config = configparser.ConfigParser()
+    config = ConfigParser()
     config.read(config_path)
 
     def check_config(config_name, config_small):
