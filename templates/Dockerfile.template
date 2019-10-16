@@ -20,6 +20,7 @@ RUN set -x; \
             libldap-2.4-2 \
             sudo \
             node-less \
+            python3-yaml \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
