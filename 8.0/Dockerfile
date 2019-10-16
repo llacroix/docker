@@ -80,6 +80,7 @@ RUN mkdir /addons \
     && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
 
+ENV OPENERP_SERVER /etc/odoo/odoo.conf
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
 # Env variable defined to monitor the kind of service running

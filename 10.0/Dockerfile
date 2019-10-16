@@ -40,7 +40,7 @@ RUN set -x; \
 
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 10.0
-ENV ODOO_RELEASE=20191015
+ENV ODOO_RELEASE=20191016
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -80,6 +80,7 @@ RUN mkdir /addons \
     && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
 
+ENV OPENERP_SERVER /etc/odoo/odoo.conf
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
 # Env variable defined to monitor the kind of service running

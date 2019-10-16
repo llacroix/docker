@@ -15,9 +15,9 @@ from os import path
 from os.path import expanduser
 
 try:
-    from configparser import ConfigParser
+    from configparser import ConfigParser, NoOptionError
 except Exception:
-    from ConfigParser import ConfigParser
+    from ConfigParser import ConfigParser, NoOptionError
 
 
 try:
@@ -131,14 +131,20 @@ def setup_environ(config_path):
     config = ConfigParser()
     config.read(config_path)
 
+    def get_option(config, section, name):
+        try:
+            return config.get(section, name)
+        except NoOptionError:
+            return None
+
     def check_config(config_name, config_small):
         """
         Check if config is in odoo_rc or command line
         """
         value = None
 
-        if config['options'].get(config_name):
-            value = config['options'].get(config_name)
+        if get_option(config, 'options', config_name):
+            value = get_option(config, 'options', config_name)
 
         if not value and '--%s' % config_name in sys.argv:
             idx = sys.argv.index('--%s' % config_name)
