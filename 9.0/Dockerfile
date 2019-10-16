@@ -28,7 +28,7 @@ RUN set -x; \
 
 # Install latest postgresql-client
 RUN set -x; \
-        echo 'deb https://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main' > etc/apt/sources.list.d/pgdg.list \
+        echo 'deb https://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' > etc/apt/sources.list.d/pgdg.list \
         && export GNUPGHOME="$(mktemp -d)" \
         && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
         && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
@@ -83,7 +83,7 @@ RUN mkdir /addons \
 
 ENV OPENERP_SERVER /etc/odoo/odoo.conf
 ENV ODOO_RC /etc/odoo/odoo.conf
-ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
+ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/openerp/addons
 # Env variable defined to monitor the kind of service running
 # it could be a staging/production/test or anything and undefined
 # is the default in case we need to know servers that aren't correctly
