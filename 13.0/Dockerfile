@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:disco
 LABEL maintainer="Archeti <info@archeti.ca>"
 
 # Generate locale C.UTF-8 for postgres and general locale data
