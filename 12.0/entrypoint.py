@@ -122,7 +122,7 @@ def install_master_password(config_path):
     # but older version of odoo do not support encryption so only encrypt
     # older version of odoo...
     if (
-        float(os.environ('ODOO_VERSION')) > 10 and
+        float(os.environ.get('ODOO_VERSION')) > 10 and
         ctx.identify(master_password) == 'plaintext'
     ):
         master_password = ctx.encrypt(master_password)
@@ -173,7 +173,7 @@ def setup_environ(config_path):
     for pg_val, odoo_val, small_arg in variables:
         value = check_config(odoo_val, small_arg)
         if value:
-            os.environ[pg_val] = value
+            os.environ.get[pg_val] = value
 
 def main():
     # Install apt package first then python packages
@@ -184,8 +184,8 @@ def main():
 
     # Install python packages with pip in user home
     install_python_dependencies()
-    install_master_password(os.environ['ODOO_RC'])
-    setup_environ(os.environ['ODOO_RC'])
+    install_master_password(os.environ.get['ODOO_RC'])
+    setup_environ(os.environ.get['ODOO_RC'])
 
     return start()
 
