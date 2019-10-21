@@ -12,8 +12,8 @@ RUN set -x; \
             python3-wheel \
             python3-setuptools \
             python3-pip \
-            python3.7 \
-            libpython3.7 \
+            # python3.7 \
+            # libpython3.7 \
             curl \
             gnupg \
             libpq-dev \
@@ -23,8 +23,8 @@ RUN set -x; \
             node-less \
             python3-yaml \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
-        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
-        && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
+        # && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
+        # && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2 \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb\
@@ -52,7 +52,7 @@ RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
             build-essential \
-            python3.7-dev \
+            python3.6-dev \
             libsasl2-dev \
             libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
         && pip install \
@@ -62,7 +62,7 @@ RUN set -x; \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
-            python3.7-dev \
+            python3.6-dev \
             libsasl2-dev \
             libldap2-dev \
         && apt-get autoremove -y \
@@ -86,7 +86,7 @@ RUN mkdir /addons \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
 
 ENV ODOO_RC /etc/odoo/odoo.conf
-ENV ODOO_BASE_PATH /usr/local/lib/python3.7/dist-packages/odoo/addons
+ENV ODOO_BASE_PATH /usr/local/lib/python3.6/dist-packages/odoo/addons
 # Env variable defined to monitor the kind of service running
 # it could be a staging/production/test or anything and undefined
 # is the default in case we need to know servers that aren't correctly
