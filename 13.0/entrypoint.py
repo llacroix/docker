@@ -119,7 +119,12 @@ def install_master_password(config_path):
     # This allow us to quickly setup servers without having to hash ourselves first
     # for security reason, you should always hash the password first and not expect
     # the image to do it correctly
-    if ctx.identify(master_password) == 'plaintext':
+    # but older version of odoo do not support encryption so only encrypt
+    # older version of odoo...
+    if (
+        float(os.environ('ODOO_VERSION')) > 10 and
+        ctx.identify(master_password) == 'plaintext'
+    ):
         master_password = ctx.encrypt(master_password)
 
     config.set('options', 'admin_passwd', master_password)

@@ -3,6 +3,7 @@ LABEL maintainer="Archeti <info@archeti.ca>"
 
 # Generate locale C.UTF-8 for postgres and general locale data
 ENV LANG C.UTF-8
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install some dependencies python3.7
 RUN set -x; \
@@ -53,7 +54,7 @@ RUN set -x; \
             build-essential \
             python3.7-dev \
             libsasl2-dev \
-            libldap2-dev  \
+            libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
         && pip install \
             psycogreen \
             num2words  \

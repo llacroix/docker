@@ -3,6 +3,7 @@ LABEL maintainer="Archeti <info@archeti.ca>"
 
 # Generate locale C.UTF-8 for postgres and general locale data
 ENV LANG C.UTF-8
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Install some dependencies python3.7
 RUN set -x; \
