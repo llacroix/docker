@@ -173,7 +173,7 @@ def setup_environ(config_path):
     for pg_val, odoo_val, small_arg in variables:
         value = check_config(odoo_val, small_arg)
         if value:
-            os.environ.get[pg_val] = value
+            os.environ[pg_val] = value
 
 def main():
     # Install apt package first then python packages
@@ -184,8 +184,8 @@ def main():
 
     # Install python packages with pip in user home
     install_python_dependencies()
-    install_master_password(os.environ.get['ODOO_RC'])
-    setup_environ(os.environ.get['ODOO_RC'])
+    install_master_password(os.environ.get('ODOO_RC'))
+    setup_environ(os.environ.get('ODOO_RC'))
 
     return start()
 
@@ -193,8 +193,10 @@ try:
     code = main()
     sys.exit(code)
 except Exception as exc:
-    print(exc.message)
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
 except KeyboardInterrupt as exc:
-    print(exc.message)
+    import traceback
+    traceback.print_exc()
     sys.exit(1)

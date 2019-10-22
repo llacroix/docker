@@ -10,6 +10,7 @@ import pip
 import re
 from os import path
 from os.path import expanduser
+import shutil
 
 
 def pipe(args):
@@ -62,8 +63,11 @@ def load_secrets():
     # swarm mode
     pgpass_secret = '/run/secrets/.pgpass'
     if path.exists(pgpass_secret):
-        shutil.move(pgpass_secret, path.expanduser('~'))
-        #pipe(['', 'mv', pgpass_secret, path.expanduser('~')])
+        home_folder = '/var/lib/odoo'
+        pgpass_target = path.join(home_folder, '.pgpass')
+        if path.exists(pgpass_target):
+            os.remove(pgpass_target)
+        shutil.move(pgpass_secret, home_folder)
 
     odoorc = '/run/secrets/.odoorc'
 
