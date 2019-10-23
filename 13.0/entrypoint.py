@@ -13,6 +13,10 @@ import random
 import os
 from os import path
 from os.path import expanduser
+import signal
+from passlib.context import CryptContext
+
+SIGSEGV = signal.SIGSEGV
 
 try:
     from configparser import ConfigParser, NoOptionError
@@ -40,6 +44,7 @@ def pipe(args):
     """
     Call the process with std(in,out,err)
     """
+    print("Executing external command %s" % " ".join(args))
     process = subprocess.Popen(
         args,
         stdin=sys.stdin,
@@ -48,6 +53,15 @@ def pipe(args):
     )
 
     process.wait()
+
+    print("External command execution completed with returncode(%s)" % process.returncode)
+
+    if process.returncode == -SIGSEGV.value:
+        print("PIPE call segfaulted")
+        print("Failed to execute %s" % args)
+
+    # Force a flush of buffer
+    flush_streams()
 
     return process.returncode
 
@@ -67,13 +81,14 @@ def start():
     # TODO parse sys.argv to append addons path if command is odoo
     # we can introspect /addons/* and env ODOO_BASE_PATH to compute
     # the right addons path to pass to the process
-    print("Starting odoo", sys.argv)
+    print("Starting main command", sys.argv)
 
     return pipe(sys.argv[1:])
 
 
 def call_sudo_entrypoint():
     ret = pipe(["sudo", "-H", "/sudo-entrypoint.py"])
+    return ret
 
 
 def install_python_dependencies():
@@ -86,9 +101,21 @@ def install_python_dependencies():
     # then append the specs to the loaded requirements and dump the requirements.txt
     # file in /var/lib/odoo/requirements.txt and then install this only file
     # instead of calling multiple time pip
-    for requirements in glob.glob("/addons/**/requirements.txt"):
+    requirement_files = glob.glob("/addons/**/requirements.txt")
+    requirement_files.sort()
+
+    print("Installing python requirements found in:")
+    print("    \n".join(requirement_files))
+
+    for requirements in requirement_files:
         print("Installing python packages from %s" % requirements)
-        pip.main(['install', '-r', requirements])
+        flush_streams()
+        # pip.main(['install', '-r', requirements])
+        pipe(["pip", "install", "-r", requirements])
+        print("Done")
+        flush_streams()
+
+    print("Installing python requirements complete\n")
 
 
 def randomString(stringLength=10):
@@ -100,7 +127,7 @@ def install_master_password(config_path):
     # Secure an odoo instance with a default master password
     # if required we can update the master password but at least
     # odoo doesn't get exposed by default without master passwords
-    from passlib.context import CryptContext
+    print("Installing master password in ODOORC")
 
     ctx = CryptContext(['pbkdf2_sha512', 'plaintext'], deprecated=['plaintext'])
     config = ConfigParser()
@@ -114,6 +141,14 @@ def install_master_password(config_path):
         master_password = os.environ.get('MASTER_PASSWORD')
     else:
         master_password = randomString(64)
+
+        if os.environ.get('DEPLOYMENT_AREA') == 'undefined':
+            print(
+                "Use this randomly generated master password"
+                " to manage the database"
+            )
+            print("    %s" % master_password)
+
 
     # Check that we don't have plaintext and encrypt it
     # This allow us to quickly setup servers without having to hash ourselves first
@@ -132,7 +167,10 @@ def install_master_password(config_path):
     with open(config_path, 'w') as out:
         config.write(out)
 
+    print("Installing master password completed")
+
 def setup_environ(config_path):
+    print("Configuring environment variables for postgresql")
     config = ConfigParser()
     config.read(config_path)
 
@@ -175,10 +213,12 @@ def setup_environ(config_path):
         if value:
             os.environ[pg_val] = value
 
+    print("Configuring environment variables done")
+
 def main():
     # Install apt package first then python packages
     ret = call_sudo_entrypoint()
-    print("Return from sudo", ret)
+
     if ret not in [0, None]:
         sys.exit(ret)
 
@@ -189,14 +229,23 @@ def main():
 
     return start()
 
+def flush_streams():
+    sys.stdout.flush()
+    sys.stderr.flush()
+
 try:
     code = main()
+    flush_streams()
     sys.exit(code)
 except Exception as exc:
+    print(exc)
     import traceback
     traceback.print_exc()
+    flush_streams()
     sys.exit(1)
 except KeyboardInterrupt as exc:
+    print(exc)
     import traceback
     traceback.print_exc()
+    flush_streams()
     sys.exit(1)
