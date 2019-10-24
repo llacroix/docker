@@ -63,7 +63,7 @@ def pipe(args):
 
     print("External command execution completed with returncode(%s)" % process.returncode)
 
-    if process.returncode == -SIGSEGV.value:
+    if process.returncode == -SIGSEGV:
         print("PIPE call segfaulted")
         print("Failed to execute %s" % args)
 
