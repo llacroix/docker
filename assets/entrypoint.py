@@ -16,15 +16,22 @@ from os.path import expanduser
 import signal
 from passlib.context import CryptContext
 
-SIGSEGV = signal.SIGSEGV
+try:
+    # python3
+    SIGSEGV = signal.SIGSEGV.value
+except AttributeError:
+    SIGSEGV = signal.SIGSEGV
+
 
 try:
+    # python3
     from configparser import ConfigParser, NoOptionError
 except Exception:
     from ConfigParser import ConfigParser, NoOptionError
 
 
 try:
+    # python3
     quote = shlex.quote
 except Exception as exc:
     def quote(s):
