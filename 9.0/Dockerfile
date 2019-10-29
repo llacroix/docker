@@ -95,6 +95,8 @@ expose 8071
 
 USER odoo
 
+LABEL version="9.0c"
+LABEL release="20190424"
 
 ENTRYPOINT ["/entrypoint.py"]
 

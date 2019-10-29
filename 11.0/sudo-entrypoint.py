@@ -38,9 +38,9 @@ def install_apt_packages():
     for packages in glob.glob("/addons/**/apt-packages.txt"):
         print("Installing packages from %s" % packages)
         with open(packages, 'r') as pack_file:
-            lines = [line.strip() for line in pack_file]         
+            lines = [line.strip() for line in pack_file]
             package_list.update(set(lines))
-        
+
     if len(package_list) > 0:
         ret = pipe(['apt-get', 'update'])
 
@@ -69,8 +69,6 @@ def load_secrets():
             os.remove(pgpass_target)
         shutil.move(pgpass_secret, home_folder)
 
-    odoorc = '/run/secrets/.odoorc'
-
 
 def fix_access_rights():
     pipe(["chown", "-R", "odoo:odoo", "/var/lib/odoo"])
@@ -85,7 +83,7 @@ def main():
     install_apt_packages()
     load_secrets()
     fix_access_rights()
-    return remove_sudo() 
+    return remove_sudo()
 
 
 try:

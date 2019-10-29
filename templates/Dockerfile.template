@@ -98,6 +98,9 @@ expose 8071
 
 USER odoo
 
+LABEL version="%(version)s"
+LABEL release="%(release)s"
+
 ENTRYPOINT ["/entrypoint.py"]
 
 cmd ["odoo"]

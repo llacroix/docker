@@ -45,8 +45,8 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 13.0
-ENV ODOO_RELEASE=20191025
+ENV ODOO_VERSION 11.0
+ENV ODOO_RELEASE=20191029
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -54,7 +54,7 @@ RUN set -x; \
             build-essential \
             python3.6-dev \
             libsasl2-dev \
-            libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
+            libldap2-dev ruby-sass \
         && pip install \
             psycogreen \
             num2words  \
@@ -98,8 +98,8 @@ expose 8071
 
 USER odoo
 
-LABEL version="13.0"
-LABEL release="20191025"
+LABEL version="11.0"
+LABEL release="20191029"
 
 ENTRYPOINT ["/entrypoint.py"]
 

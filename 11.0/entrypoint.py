@@ -33,7 +33,7 @@ except Exception:
 try:
     # python3
     quote = shlex.quote
-except Exception as exc:
+except Exception:
     def quote(s):
         """Return a shell-escaped version of the string *s*."""
         _find_unsafe = re.compile(r'[^\w@%+=:,./-]').search
@@ -52,6 +52,8 @@ def pipe(args):
     Call the process with std(in,out,err)
     """
     print("Executing external command %s" % " ".join(args))
+    flush_streams()
+
     process = subprocess.Popen(
         args,
         stdin=sys.stdin,
@@ -61,7 +63,11 @@ def pipe(args):
 
     process.wait()
 
-    print("External command execution completed with returncode(%s)" % process.returncode)
+    print(
+        (
+            "External command execution completed with returncode(%s)"
+        ) % process.returncode
+    )
 
     if process.returncode == -SIGSEGV:
         print("PIPE call segfaulted")
@@ -77,17 +83,6 @@ def start():
     """
     Main process running odoo
     """
-    #quoted_args = [
-    #    quote(arg)
-    #    for arg in sys.argv[1:]
-    #] or ["true"]
-    #username = "odoo"
-
-    # Run the command as odoo while everything is quoted
-    #return pipe(["su", username, "-c", " ".join(quoted_args)])
-    # TODO parse sys.argv to append addons path if command is odoo
-    # we can introspect /addons/* and env ODOO_BASE_PATH to compute
-    # the right addons path to pass to the process
     print("Starting main command", sys.argv)
 
     return pipe(sys.argv[1:])
@@ -105,9 +100,9 @@ def install_python_dependencies():
     # TODO
     # https://pypi.org/project/requirements-parser/
     # to parse all the requirements file to parse all the possible specs
-    # then append the specs to the loaded requirements and dump the requirements.txt
-    # file in /var/lib/odoo/requirements.txt and then install this only file
-    # instead of calling multiple time pip
+    # then append the specs to the loaded requirements and dump
+    # the requirements.txt file in /var/lib/odoo/requirements.txt and
+    # then install this only file instead of calling multiple time pip
     requirement_files = glob.glob("/addons/**/requirements.txt")
     requirement_files.sort()
 
@@ -123,6 +118,7 @@ def install_python_dependencies():
         flush_streams()
 
     print("Installing python requirements complete\n")
+    flush_streams()
 
 
 def randomString(stringLength=10):
@@ -130,13 +126,17 @@ def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
+
 def install_master_password(config_path):
     # Secure an odoo instance with a default master password
     # if required we can update the master password but at least
     # odoo doesn't get exposed by default without master passwords
     print("Installing master password in ODOORC")
 
-    ctx = CryptContext(['pbkdf2_sha512', 'plaintext'], deprecated=['plaintext'])
+    ctx = CryptContext(
+        ['pbkdf2_sha512', 'plaintext'],
+        deprecated=['plaintext']
+    )
     config = ConfigParser()
     config.read(config_path)
 
@@ -156,11 +156,10 @@ def install_master_password(config_path):
             )
             print("    %s" % master_password)
 
-
     # Check that we don't have plaintext and encrypt it
-    # This allow us to quickly setup servers without having to hash ourselves first
-    # for security reason, you should always hash the password first and not expect
-    # the image to do it correctly
+    # This allow us to quickly setup servers without having to hash
+    # ourselves first for security reason, you should always hash
+    # the password first and not expect the image to do it correctly
     # but older version of odoo do not support encryption so only encrypt
     # older version of odoo...
     if (
@@ -175,6 +174,48 @@ def install_master_password(config_path):
         config.write(out)
 
     print("Installing master password completed")
+
+    flush_streams()
+
+
+def get_dirs(cur_path):
+    return [
+        path.join(cur_path, npath)
+        for npath in os.listdir(cur_path)
+        if path.isdir(path.join(cur_path, npath))
+    ]
+
+
+def setup_addons_paths(config_path):
+    base_addons = os.environ.get('ODOO_BASE_PATH')
+
+    addons = os.listdir('/addons')
+
+    valid_paths = [base_addons]
+
+    addons_paths = get_dirs(addons)
+    for addons_path in addons_paths:
+        addons = get_dirs(addons_path)
+        for addon in addons:
+            files = os.listdir(addon)
+            if (
+                '__init__' in files and
+                '__manifest__' in files or
+                '__openerp__' in files
+            ):
+                valid_paths.append(addons_path)
+                break
+        if addons_path in valid_paths:
+            break
+
+    config = ConfigParser()
+    config.read(config_path)
+    config.set('options', 'addons_path', valid_paths)
+    with open(config_path, 'w') as out:
+        config.write(out)
+
+    flush_streams()
+
 
 def setup_environ(config_path):
     print("Configuring environment variables for postgresql")
@@ -198,11 +239,11 @@ def setup_environ(config_path):
 
         if not value and '--%s' % config_name in sys.argv:
             idx = sys.argv.index('--%s' % config_name)
-            value = sys.argv[idx+1] if idx < len(sys.argv) else None
+            value = sys.argv[idx + 1] if idx < len(sys.argv) else None
 
         if not value and config_small and '-%s' % config_small in sys.argv:
             idx = sys.argv.index('-%s' % config_small)
-            value = sys.argv[idx+1] if idx < len(sys.argv) else None
+            value = sys.argv[idx + 1] if idx < len(sys.argv) else None
 
         return value
 
@@ -221,6 +262,36 @@ def setup_environ(config_path):
             os.environ[pg_val] = value
 
     print("Configuring environment variables done")
+    flush_streams()
+
+
+def wait_postgresql():
+    import psycopg2
+
+    retries = int(os.environ.get('PGRETRY', 5))
+    retries_wait = int(os.environ.get('PGRETRYTIME', 1))
+    error = None
+
+    for retry in range(retries):
+        try:
+            print("Trying to connect to postgresql")
+            # connect using defined env variables and pgpass files
+            flush_streams()
+            conn = psycopg2.connect("")
+            message = "  Connected to %(user)s@%(host)s:%(port)s"
+            print(message % conn.get_dsn_parameters())
+            flush_streams()
+        except psycopg2.OperationalError as exc:
+            error = exc
+            time.sleep(retries_wait)
+    else:
+        # we reached the maximum retries so we trigger failure mode
+        if error:
+            print("Database connection failure %s" % error)
+            flush_streams()
+
+        sys.exit(1)
+
 
 def main():
     # Install apt package first then python packages
@@ -233,12 +304,17 @@ def main():
     install_python_dependencies()
     install_master_password(os.environ.get('ODOO_RC'))
     setup_environ(os.environ.get('ODOO_RC'))
+    setup_addons_paths(os.environ.get('ODOO_RC'))
+
+    wait_postgresql()
 
     return start()
+
 
 def flush_streams():
     sys.stdout.flush()
     sys.stderr.flush()
+
 
 try:
     code = main()

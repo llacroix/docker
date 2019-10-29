@@ -3,17 +3,16 @@ LABEL maintainer="Archeti <info@archeti.ca>"
 
 # Generate locale C.UTF-8 for postgres and general locale data
 ENV LANG C.UTF-8
-ARG DEBIAN_FRONTEND=noninteractive
 
 # Install some dependencies python3.7
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
-            python3-wheel \
-            python3-setuptools \
-            python3-pip \
-            # python3.7 \
-            # libpython3.7 \
+            python-wheel \
+            python-setuptools \
+            python-pip \
+            python2.7 \
+            libpython2.7 \
             curl \
             gnupg \
             libpq-dev \
@@ -21,11 +20,7 @@ RUN set -x; \
             libldap-2.4-2 \
             sudo \
             node-less \
-            python3-yaml \
-        && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
-        # && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
-        && update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1 \
-        && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2 \
+            python-yaml \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && dpkg --force-depends -i wkhtmltox.deb\
         && apt-get -y install -f --no-install-recommends \
@@ -45,16 +40,16 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 13.0
-ENV ODOO_RELEASE=20191025
+ENV ODOO_VERSION 10.0
+ENV ODOO_RELEASE=20191029
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
             build-essential \
-            python3.6-dev \
+            python2.7-dev \
             libsasl2-dev \
-            libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
+            libldap2-dev ruby-sass \
         && pip install \
             psycogreen \
             num2words  \
@@ -62,7 +57,7 @@ RUN set -x; \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
-            python3.6-dev \
+            python2.7-dev \
             libsasl2-dev \
             libldap2-dev \
         && apt-get autoremove -y \
@@ -83,10 +78,12 @@ RUN mkdir /addons \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
+    && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
 
+ENV OPENERP_SERVER /etc/odoo/odoo.conf
 ENV ODOO_RC /etc/odoo/odoo.conf
-ENV ODOO_BASE_PATH /usr/local/lib/python3.6/dist-packages/odoo/addons
+ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
 # Env variable defined to monitor the kind of service running
 # it could be a staging/production/test or anything and undefined
 # is the default in case we need to know servers that aren't correctly
@@ -98,8 +95,8 @@ expose 8071
 
 USER odoo
 
-LABEL version="13.0"
-LABEL release="20191025"
+LABEL version="10.0"
+LABEL release="20191029"
 
 ENTRYPOINT ["/entrypoint.py"]
 
