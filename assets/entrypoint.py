@@ -254,6 +254,14 @@ def setup_environ(config_path):
         ('PGDATABASE', 'database', 'd')
     ]
 
+    # Accpet db_password only with this if some infra cannot be setup otherwise...
+    # It's a bad idea to pass password in cleartext in command line or
+    # environment variables so please use .pgpass instead...
+    if os.environ.get('I_KNOW_WHAT_IM_DOING') == 'TRUE':
+        variables.append(
+            ('PGPASSWORD', 'db_password', 'w')
+        )
+
     # Setup basic PG env variables to simplify managements
     # combined with secret pg pass we can use psql directly
     for pg_val, odoo_val, small_arg in variables:

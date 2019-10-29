@@ -23,6 +23,28 @@ And run with:
 Features:
 =========
 
+Load PG variables and wait for connection
+-----------------------------------------
+
+Environment variables are set from ODOORC file and or from command line arguments.
+If env variables are available it will also use them to setup ENV variables for
+postgres.
+
+Before starting odoo, a connection to postgres is attempted with the defined
+env variables. The connection string for psycopg2 is emtpy in order to use the
+default values available and also make use of .pgpass file available in the
+environment. This way, it is possible to connect to postgres without explicitely
+pass a password in cleartext anywhere.
+
+The .pgpass file should be enough to connect to the database without setting 
+an env variable named PGPASSWORD or using --db_password. This image doesn't
+support storing password in cleartext or as a parameter so --db_password will
+have no effect on the connection retry unless you pass the env variable:
+
+    I_KNOW_WHAT_IM_DOING=TRUE
+
+In the environment.
+
 Automatic MasterPassword Generation
 -----------------------------------
 
@@ -67,6 +89,10 @@ Run the script `build.py` to generate the Dockerfile based on the versions.toml 
 TODO:
 =====
 
+- [x] Added stable images based on older version of odoo and nightly tag for odoo release updated
+      daily. This can be useful to have around a week to test that updating the stable image will
+      not create unforseen behaviour.
+- [x] Wait for postgres to be up and available for connection to prevent odoo from hanging in limbo
 - [x] Uniform setup for odoo 8 to 13, make odoo work transparently regardless of the openerp 
       name for versions with openerp instead of odoo.
 - [x] Run entrypoint as odoo user with a sudo entrypoint that remove itself from sudoers when 
@@ -77,7 +103,7 @@ TODO:
       container.
 - [x] Use a secret to setup a `.pgpass` file for postgres
 - [x] Fix dependencies for ubuntu bionic
-- [ ] Automatically build addons path parameters based on folders in /addons/* and environment 
+- [x] Automatically build addons path parameters based on folders in /addons/* and environment 
       variables.
 - [ ] Automatically detect modules that should get update on boot. For example, you want to start
       odoo and always update a certain set of modules or a certain set of addons repository.
