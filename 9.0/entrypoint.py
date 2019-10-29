@@ -193,24 +193,31 @@ def setup_addons_paths(config_path):
 
     valid_paths = [base_addons]
 
-    addons_paths = get_dirs(addons)
+    addons_paths = get_dirs('/addons')
     for addons_path in addons_paths:
+        print("Lookup addons in %s" % addons_path)
+        flush_streams()
         addons = get_dirs(addons_path)
         for addon in addons:
             files = os.listdir(addon)
             if (
-                '__init__' in files and
-                '__manifest__' in files or
-                '__openerp__' in files
+                '__init__.py' in files and
+                '__manifest__.py' in files or
+                '__openerp__.py' in files
             ):
                 valid_paths.append(addons_path)
+                print("Addons found !")
+                flush_streams()
                 break
         if addons_path in valid_paths:
-            break
+            continue
+        else:
+            print("No addons found in path. Skipping...")
+            flush_streams()
 
     config = ConfigParser()
     config.read(config_path)
-    config.set('options', 'addons_path', valid_paths)
+    config.set('options', 'addons_path', ",".join(valid_paths))
     with open(config_path, 'w') as out:
         config.write(out)
 
@@ -254,6 +261,14 @@ def setup_environ(config_path):
         ('PGDATABASE', 'database', 'd')
     ]
 
+    # Accpet db_password only with this if some infra cannot be setup otherwise...
+    # It's a bad idea to pass password in cleartext in command line or
+    # environment variables so please use .pgpass instead...
+    if os.environ.get('I_KNOW_WHAT_IM_DOING') == 'TRUE':
+        variables.append(
+            ('PGPASSWORD', 'db_password', 'w')
+        )
+
     # Setup basic PG env variables to simplify managements
     # combined with secret pg pass we can use psql directly
     for pg_val, odoo_val, small_arg in variables:
@@ -272,6 +287,10 @@ def wait_postgresql():
     retries_wait = int(os.environ.get('PGRETRYTIME', 1))
     error = None
 
+    # Default database set to postgres
+    if not os.environ.get('PGDATABASE'):
+        os.environ['PGDATABASE'] = 'postgres'
+
     for retry in range(retries):
         try:
             print("Trying to connect to postgresql")
@@ -281,6 +300,7 @@ def wait_postgresql():
             message = "  Connected to %(user)s@%(host)s:%(port)s"
             print(message % conn.get_dsn_parameters())
             flush_streams()
+            break
         except psycopg2.OperationalError as exc:
             error = exc
             time.sleep(retries_wait)
@@ -306,7 +326,8 @@ def main():
     setup_environ(os.environ.get('ODOO_RC'))
     setup_addons_paths(os.environ.get('ODOO_RC'))
 
-    wait_postgresql()
+    if not os.environ.get('ODOO_SKIP_POSTGRES_WAIT'):
+        wait_postgresql()
 
     return start()
 
