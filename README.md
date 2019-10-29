@@ -13,11 +13,37 @@ How to use
 
 pull the images with the following command for odoo 12.0:
 
-    docker pull llacroix/odoo:12.0-ubuntu
+    docker pull llacroix/odoo:13
 
 And run with:
 
-    docker run -it llacroix/odoo:12.0-ubuntu
+    docker run -it llacroix/odoo:13 odoo --db_host [db_host]
+
+
+To run with addons, you can use it like this:
+
+    docker run -it -v /path_to/some_addons:/addons/some_addons llacroix/odoo:13 --db_host [db_host]
+
+
+Supported environment variables
+===============================
+
+NAME                      | Definition
+------------------------- | ------------------------------------
+`PGHOST`                  | Postgres hostname/ip.
+`PGUSER`                  | Postgres user for connection.
+`PGDATABASE`              | Database to connect to.
+`PGPASSWORD`              | Password to use but only working when paired with `I_KNOW_WHAT_IM_DOING=TRUE`.
+`I_KNOW_WHAT_IM_DOING`    | A trigger required to enable dangerous configurations.
+`PGRETRY`                 | Amount of times to retry connections.
+`PGRETRYTIME`             | Amount of times to wait between connections retry.
+`ODOO_SKIP_POSTGRES_WAIT` | Skip waiting for postgres.
+`ODOO_RC`                 | Path to odoo config file.
+`MASTER_PASSWORD`         | Master Pasword to be defined.
+`DEPLOYMENT_AREA`         | Defined to know in which area is the container deployed.
+`ODOO_VERSION`            | Defined in the image to get information about the running container.
+`ODOO_BASE_PATH`          | Base path for odoo addons installed by pip.
+                                       
     
 
 Features:
@@ -37,8 +63,8 @@ environment. This way, it is possible to connect to postgres without explicitely
 pass a password in cleartext anywhere.
 
 The .pgpass file should be enough to connect to the database without setting 
-an env variable named PGPASSWORD or using --db_password. This image doesn't
-support storing password in cleartext or as a parameter so --db_password will
+an env variable named PGPASSWORD or using `--db_password`. This image doesn't
+support storing password in cleartext or as a parameter so `--db_password` will
 have no effect on the connection retry unless you pass the env variable:
 
     I_KNOW_WHAT_IM_DOING=TRUE
@@ -57,9 +83,9 @@ MasterPassword through secrets
 ------------------------------
 
 It's possible to set a master password using docker swarm secrets. When the instance boots,
-odoo check for a master_password file in the secrets folder and extract its content as the
+odoo check for a `master_password` file in the secrets folder and extract its content as the
 value of the password. If the password is not encrypted, it will automatically encrypt it
-and save it into the ODOO_RC file path. Encryption is only supported by version of odoo higher
+and save it into the `ODOO_RC` file path. Encryption is only supported by version of odoo higher
 than 10 because encryption wasn't supported with version prior. 
 
 Extra Addons supports
@@ -103,7 +129,7 @@ TODO:
       container.
 - [x] Use a secret to setup a `.pgpass` file for postgres
 - [x] Fix dependencies for ubuntu bionic
-- [x] Automatically build addons path parameters based on folders in /addons/* and environment 
+- [x] Automatically build addons path parameters based on folders in `/addons/*` and environment 
       variables.
 - [ ] Automatically detect modules that should get update on boot. For example, you want to start
       odoo and always update a certain set of modules or a certain set of addons repository.
