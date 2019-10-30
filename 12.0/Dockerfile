@@ -27,8 +27,7 @@ RUN set -x; \
         && update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1 \
         && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 2 \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
-        && dpkg --force-depends -i wkhtmltox.deb\
-        && apt-get -y install -f --no-install-recommends \
+        && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
         && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
 # Install latest postgresql-client
@@ -37,7 +36,7 @@ RUN set -x; \
         && export GNUPGHOME="$(mktemp -d)" \
         && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
         && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
-        && gpg --armor --export "${repokey}" | apt-key add - \
+        && gpg --batch --armor --export "${repokey}" > /etc/apt/trusted.gpg.d/pgdg.gpg.asc \
         && gpgconf --kill all \
         && rm -rf "$GNUPGHOME" \
         && apt-get update  \
@@ -100,6 +99,17 @@ USER odoo
 
 LABEL version="12.0"
 LABEL release="20191025"
+
+LABEL org.opencontainers.image.created="2019-10-29T21:46:47.484833"
+LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
+LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
+LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
+LABEL org.opencontainers.image.source="https://github.com/llacroix/odoo-docker"
+LABEL org.opencontainers.image.version="12.0"
+LABEL org.opencontainers.image.vendor="ArcheTI"
+LABEL org.opencontainers.image.ref.name="12.0"
+LABEL org.opencontainers.image.title="Odoo 12.0"
+LABEL org.opencontainers.image.description="Full featured odoo image that make odoo deployment fun and secure."
 
 ENTRYPOINT ["/entrypoint.py"]
 

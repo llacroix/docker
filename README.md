@@ -41,7 +41,8 @@ NAME                      | Definition
 `ODOO_RC`                 | Path to odoo config file.
 `MASTER_PASSWORD`         | Master Pasword to be defined.
 `DEPLOYMENT_AREA`         | Defined to know in which area is the container deployed.
-`ODOO_VERSION`            | Defined in the image to get information about the running container.
+`ODOO_VERSION`            | Odoo version as defined in the image for example: 13.0
+`ODOO_RELEASE`            | Odoo release as defined in the image for example: 20191020
 `ODOO_BASE_PATH`          | Base path for odoo addons installed by pip.
                                        
     
@@ -131,6 +132,7 @@ TODO:
 - [x] Fix dependencies for ubuntu bionic
 - [x] Automatically build addons path parameters based on folders in `/addons/*` and environment 
       variables.
+- [x] Improve labels to conform with https://github.com/opencontainers/image-spec/blob/master/annotations.md
 - [ ] Automatically detect modules that should get update on boot. For example, you want to start
       odoo and always update a certain set of modules or a certain set of addons repository.
 - [ ] Automatically detect server wide modules

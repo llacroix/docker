@@ -35,6 +35,9 @@ os.mkdir("build")
 tags = []
 
 for tag, config in config.get("odoo", {}).items():
+    config['tag'] = tag
+    config['created_date'] = datetime.now().isoformat()
+
     config = dict(defaults, **config)
 
     if 'release' not in config:
