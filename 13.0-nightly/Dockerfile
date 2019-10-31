@@ -46,7 +46,7 @@ RUN set -x; \
 
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 13.0
-ENV ODOO_RELEASE=20191030
+ENV ODOO_RELEASE=20191031
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -99,7 +99,7 @@ expose 8071
 USER odoo
 
 LABEL version="13.0"
-LABEL release="20191030"
+LABEL release="20191031"
 
 ENTRYPOINT ["/entrypoint.py"]
 
