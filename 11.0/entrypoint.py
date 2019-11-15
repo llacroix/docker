@@ -17,6 +17,14 @@ import signal
 from passlib.context import CryptContext
 
 try:
+    from pip._internal.download import PipSession
+    from pip._internal.req.req_file import parse_requirements
+except Exception:
+    from pip.download import PipSession
+    from pip.req.req_file import parse_requirements
+from collections import defaultdict
+
+try:
     # python3
     SIGSEGV = signal.SIGSEGV.value
 except AttributeError:
@@ -46,6 +54,44 @@ except Exception:
         # the string $'b is then quoted as '$'"'"'b'
         return "'" + s.replace("'", "'\"'\"'") + "'"
 
+
+class Requirement(object):
+    def __init__(self):
+        self.extras = set()
+        self.specifiers = set()
+
+
+def merge_requirements(files):
+    requirements = defaultdict(lambda: Requirement())
+    links = set()
+
+    for filename in files:
+        for requirement in parse_requirements(filename, session=PipSession()):
+            if not hasattr(requirement.req, 'name'):
+                links.add(requirement.link.url)
+                break
+            name = requirement.req.name
+            specifiers = requirement.req.specifier
+            extras = requirement.req.extras
+            requirements[name].extras |= set(extras)
+            requirements[name].specifiers |= set(specifiers)
+
+    result = []
+    for key, value in requirements.items():
+        if not value.extras:
+
+            result.append("%s %s" % (key, ",".join(map(str, value.specifiers))))
+        else:
+            result.append("%s [%s] %s" % (
+                key,
+                ",".join(map(str, value.extras)),
+                ",".join(map(str, value.specifiers))
+            ))
+
+    for link in links:
+        result.append(link)
+
+    return "\n".join(result)
 
 def pipe(args):
     """
@@ -109,13 +155,25 @@ def install_python_dependencies():
     print("Installing python requirements found in:")
     print("    \n".join(requirement_files))
 
+    req_file = '/var/lib/odoo/requirements.txt'
+    with open(req_file, 'w') as fout:
+        data = merge_requirements(requirement_files)
+        fout.write(data)
+
     for requirements in requirement_files:
         print("Installing python packages from %s" % requirements)
         flush_streams()
         # pip.main(['install', '-r', requirements])
-        pipe(["pip", "install", "-r", requirements])
-        print("Done")
-        flush_streams()
+        #pipe(["pip", "install", "-r", requirements])
+        #print("Done")
+        #flush_streams()
+
+    print(data)
+    flush_streams()
+
+    os.environ['PATH'] = "/var/lib/odoo/.local/bin:%s" % (os.environ['PATH'],)
+    pipe(["pip", "install", "--user", "-r", req_file])
+    flush_streams()
 
     print("Installing python requirements complete\n")
     flush_streams()
