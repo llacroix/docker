@@ -67,7 +67,11 @@ def load_secrets():
         pgpass_target = path.join(home_folder, '.pgpass')
         if path.exists(pgpass_target):
             os.remove(pgpass_target)
-        shutil.move(pgpass_secret, home_folder)
+        # shutil.move doesn't always work correctly on different fs
+        shutil.copy(pgpass_secret, home_folder)
+        # Cannot remove anymore apparently
+        # os.remove(pgpass_secret)
+        # shutil.move(pgpass_secret, home_folder)
 
 
 def fix_access_rights():
@@ -90,8 +94,8 @@ try:
     code = main()
     sys.exit(code)
 except Exception as exc:
-    print(exc.message)
+    print(exc)
     sys.exit(1)
 except KeyboardInterrupt as exc:
-    print(exc.message)
+    print(exc)
     sys.exit(1)
