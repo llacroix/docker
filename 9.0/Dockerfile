@@ -38,6 +38,7 @@ RUN set -x; \
         && apt-get install -y postgresql-client \
         && rm -rf /var/lib/apt/lists/*
 
+ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 9.0c
 ENV ODOO_RELEASE=20190424
@@ -49,6 +50,7 @@ RUN set -x; \
             python2.7-dev \
             libsasl2-dev \
             libldap2-dev ruby-sass \
+        && pip install -U pip \
         && pip install \
             psycogreen \
             num2words  \
@@ -97,7 +99,7 @@ USER odoo
 LABEL version="9.0c"
 LABEL release="20190424"
 
-LABEL org.opencontainers.image.created="2019-11-25T23:00:04.613553"
+LABEL org.opencontainers.image.created="2019-11-26T23:00:05.344975"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

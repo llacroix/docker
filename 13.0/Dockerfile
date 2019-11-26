@@ -43,6 +43,7 @@ RUN set -x; \
         && apt-get install -y postgresql-client \
         && rm -rf /var/lib/apt/lists/*
 
+ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 13.0
 ENV ODOO_RELEASE=20191025
@@ -54,6 +55,7 @@ RUN set -x; \
             python3.6-dev \
             libsasl2-dev \
             libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
+        && pip install -U pip \
         && pip install \
             psycogreen \
             num2words  \
@@ -100,7 +102,7 @@ USER odoo
 LABEL version="13.0"
 LABEL release="20191025"
 
-LABEL org.opencontainers.image.created="2019-11-25T23:00:04.615610"
+LABEL org.opencontainers.image.created="2019-11-26T23:00:05.347045"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
