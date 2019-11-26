@@ -43,6 +43,7 @@ RUN set -x; \
         && apt-get install -y postgresql-client \
         && rm -rf /var/lib/apt/lists/*
 
+ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION %(version)s
 ENV ODOO_RELEASE=%(release)s
@@ -54,6 +55,7 @@ RUN set -x; \
             python3.6-dev \
             libsasl2-dev \
             libldap2-dev %(apt_packages)s \
+        && pip install -U pip \
         && pip install \
             psycogreen \
             num2words %(pip_packages)s \
