@@ -51,10 +51,10 @@ RUN set -x; \
             libsasl2-dev \
             libldap2-dev %(apt_packages)s \
         && pip install -U pip \
-        && pip install \
+        && /usr/bin/env pip install \
             psycogreen \
             num2words %(pip_packages)s \
-        && pip install https://nightly.odoo.com/%(version_path)s/nightly/src/${ODOO_ARCHIVE} \
+        && /usr/bin/env pip install https://nightly.odoo.com/%(version_path)s/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
