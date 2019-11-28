@@ -51,10 +51,10 @@ RUN set -x; \
             libsasl2-dev \
             libldap2-dev  \
         && pip install -U pip \
-        && pip install \
+        && /usr/bin/env pip install \
             psycogreen \
             num2words  \
-        && pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
@@ -99,7 +99,7 @@ USER odoo
 LABEL version="8.0"
 LABEL release="20171001"
 
-LABEL org.opencontainers.image.created="2019-11-27T23:00:04.119204"
+LABEL org.opencontainers.image.created="2019-11-28T01:38:39.001378"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

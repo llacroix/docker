@@ -46,7 +46,7 @@ RUN set -x; \
 ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 12.0
-ENV ODOO_RELEASE=20191127
+ENV ODOO_RELEASE=20191128
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -56,10 +56,10 @@ RUN set -x; \
             libsasl2-dev \
             libldap2-dev  \
         && pip install -U pip \
-        && pip install \
+        && /usr/bin/env pip install \
             psycogreen \
             num2words  \
-        && pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
@@ -100,9 +100,9 @@ expose 8071
 USER odoo
 
 LABEL version="12.0"
-LABEL release="20191127"
+LABEL release="20191128"
 
-LABEL org.opencontainers.image.created="2019-11-27T23:00:04.123456"
+LABEL org.opencontainers.image.created="2019-11-28T01:38:39.004020"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
