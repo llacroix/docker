@@ -46,7 +46,7 @@ RUN set -x; \
 ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 14.0alpha1
-ENV ODOO_RELEASE=20191209
+ENV ODOO_RELEASE=20191210
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -100,9 +100,9 @@ expose 8071
 USER odoo
 
 LABEL version="14.0alpha1"
-LABEL release="20191209"
+LABEL release="20191210"
 
-LABEL org.opencontainers.image.created="2019-12-09T20:58:09.313198"
+LABEL org.opencontainers.image.created="2019-12-10T23:00:03.315343"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
