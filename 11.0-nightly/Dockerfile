@@ -84,7 +84,7 @@ RUN mkdir /addons \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
-    && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
+    && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /sudo-entrypoint.py" >> /etc/sudoers
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/python3.6/dist-packages/odoo/addons
@@ -102,7 +102,7 @@ USER odoo
 LABEL version="11.0"
 LABEL release="20191212"
 
-LABEL org.opencontainers.image.created="2019-12-12T22:11:06.112380"
+LABEL org.opencontainers.image.created="2019-12-12T23:17:40.060124"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

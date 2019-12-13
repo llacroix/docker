@@ -75,13 +75,19 @@ def load_secrets():
         # shutil.move(pgpass_secret, home_folder)
 
 def disable_base_modules():
-    base_addons = os.environ.get('ODOO_BASE_PATH')
+    base_addons = os.environ.get('ODOO_BASE_PATH', '')
     addons_to_remove = os.environ.get('ODOO_DISABLED_MODULES', '')
 
     modules = addons_to_remove.split(',')
     modules = map(lambda mod: mod.strip(), modules)
+
+    if not base_addons:
+        print("Do not attempt to remove wrong folder")
+        return
     
     for module in modules:
+        if not module:
+            continue
         print("Removing module %s from %s" % (module, base_addons)) 
 
         module_path = Path(base_addons, module)

@@ -100,11 +100,14 @@ def pipe(args):
     print("Executing external command %s" % " ".join(args))
     flush_streams()
 
+    env = os.environ.copy()
+
     process = subprocess.Popen(
         args,
         stdin=sys.stdin,
         stdout=sys.stdout,
         stderr=sys.stderr,
+        env=env
     )
 
     process.wait()
@@ -135,7 +138,21 @@ def start():
 
 
 def call_sudo_entrypoint():
-    ret = pipe(["sudo", "-H", "/sudo-entrypoint.py"])
+    command = ["sudo", "-H", "-E"]
+    args = ["/sudo-entrypoint.py"]
+
+    #env_args = [
+    #    "%s=%s" % (key, value)
+    #    for key, value in os.environ.items()
+    #]
+
+    ret = pipe(
+        command +
+        #env_args +
+        args
+    )
+
+    #ret = pipe(["sudo", "-E", "-H", "/sudo-entrypoint.py"])
     return ret
 
 
