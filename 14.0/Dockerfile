@@ -45,21 +45,21 @@ RUN set -x; \
 
 ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 11.0
-ENV ODOO_RELEASE=20191212
-ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
+ENV ODOO_VERSION 14.0
+ENV ODOO_RELEASE=20191201
+ARG ODOO_ARCHIVE=odoo_14.0alpha1.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
             build-essential \
             python3.6-dev \
             libsasl2-dev \
-            libldap2-dev ruby-sass \
+            libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
         && pip install -U pip \
         && /usr/bin/env pip install \
             psycogreen \
             num2words  \
-        && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
+        && /usr/bin/env pip install https://nightly.odoo.com/master/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
@@ -99,18 +99,18 @@ expose 8071
 
 USER odoo
 
-LABEL version="11.0"
-LABEL release="20191212"
+LABEL version="14.0"
+LABEL release="20191201"
 
-LABEL org.opencontainers.image.created="2019-12-12T22:11:06.112380"
+LABEL org.opencontainers.image.created="2019-12-12T22:11:06.111759"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.source="https://github.com/llacroix/odoo-docker"
-LABEL org.opencontainers.image.version="11.0"
+LABEL org.opencontainers.image.version="14.0"
 LABEL org.opencontainers.image.vendor="ArcheTI"
-LABEL org.opencontainers.image.ref.name="11.0-nightly"
-LABEL org.opencontainers.image.title="Odoo 11.0"
+LABEL org.opencontainers.image.ref.name="14.0"
+LABEL org.opencontainers.image.title="Odoo 14.0"
 LABEL org.opencontainers.image.description="Full featured odoo image that make odoo deployment fun and secure."
 
 ENTRYPOINT ["/entrypoint.py"]
