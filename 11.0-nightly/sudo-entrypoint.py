@@ -11,6 +11,7 @@ import re
 from os import path
 from os.path import expanduser
 import shutil
+from pathlib import Path
 
 
 def pipe(args):
@@ -73,6 +74,22 @@ def load_secrets():
         # os.remove(pgpass_secret)
         # shutil.move(pgpass_secret, home_folder)
 
+def disable_base_modules():
+    base_addons = os.environ.get('ODOO_BASE_PATH')
+    addons_to_remove = os.environ.get('ODOO_DISABLED_MODULES', '')
+
+    modules = addons_to_remove.split(',')
+    modules = map(lambda mod: mod.strip(), modules)
+    
+    for module in modules:
+        print("Removing module %s from %s" % (module, base_addons)) 
+
+        module_path = Path(base_addons, module)
+        if module_path.exists() and module_path.is_dir():
+            shutil.rmtree(module_path)
+        else:
+            print("Module skipped as it doesn't seem to be present.")
+
 
 def fix_access_rights():
     pipe(["chown", "-R", "odoo:odoo", "/var/lib/odoo"])
@@ -87,6 +104,7 @@ def main():
     install_apt_packages()
     load_secrets()
     fix_access_rights()
+    disable_base_modules()
     return remove_sudo()
 
 
