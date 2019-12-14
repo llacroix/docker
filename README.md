@@ -44,6 +44,7 @@ NAME                      | Definition
 `ODOO_VERSION`            | Odoo version as defined in the image for example: 13.0
 `ODOO_RELEASE`            | Odoo release as defined in the image for example: 20191020
 `ODOO_BASE_PATH`          | Base path for odoo addons installed by pip.
+`ODOO_DISABLED_MODULES`   | Comma separated list of core odoo modules to remove from path. This is useful when you have customization made to core modules inside your personal addons path.
                                        
     
 
