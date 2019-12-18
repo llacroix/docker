@@ -80,7 +80,7 @@ RUN mkdir /addons \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
     && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true \
-    && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
+    && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /sudo-entrypoint.py" >> /etc/sudoers
 
 ENV OPENERP_SERVER /etc/odoo/odoo.conf
 ENV ODOO_RC /etc/odoo/odoo.conf
@@ -99,7 +99,7 @@ USER odoo
 LABEL version="10.0"
 LABEL release="20191201"
 
-LABEL org.opencontainers.image.created="2019-12-17T23:00:05.265204"
+LABEL org.opencontainers.image.created="2019-12-18T23:00:04.969851"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

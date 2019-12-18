@@ -41,7 +41,7 @@ RUN set -x; \
 ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 10.0
-ENV ODOO_RELEASE=20191217
+ENV ODOO_RELEASE=20191218
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -80,7 +80,7 @@ RUN mkdir /addons \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
     && cp /usr/local/bin/odoo.py /usr/local/bin/odoo || true \
-    && echo "odoo ALL=(ALL:ALL) NOPASSWD: /sudo-entrypoint.py" >> /etc/sudoers
+    && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /sudo-entrypoint.py" >> /etc/sudoers
 
 ENV OPENERP_SERVER /etc/odoo/odoo.conf
 ENV ODOO_RC /etc/odoo/odoo.conf
@@ -97,9 +97,9 @@ expose 8071
 USER odoo
 
 LABEL version="10.0"
-LABEL release="20191217"
+LABEL release="20191218"
 
-LABEL org.opencontainers.image.created="2019-12-17T23:00:05.267805"
+LABEL org.opencontainers.image.created="2019-12-18T23:00:04.972462"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
