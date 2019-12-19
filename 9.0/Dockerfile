@@ -53,7 +53,7 @@ RUN set -x; \
         && pip install -U pip \
         && /usr/bin/env pip install \
             psycogreen \
-            num2words  \
+            num2words pathlib2 \
         && /usr/bin/env pip install https://nightly.odoo.com/9.0/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
@@ -99,7 +99,7 @@ USER odoo
 LABEL version="9.0c"
 LABEL release="20190424"
 
-LABEL org.opencontainers.image.created="2019-12-18T23:00:04.969322"
+LABEL org.opencontainers.image.created="2019-12-19T00:02:09.637299"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

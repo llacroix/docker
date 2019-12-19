@@ -11,7 +11,11 @@ import re
 from os import path
 from os.path import expanduser
 import shutil
-from pathlib import Path
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
 
 
 def pipe(args):
