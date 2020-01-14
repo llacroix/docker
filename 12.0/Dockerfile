@@ -102,7 +102,7 @@ USER odoo
 LABEL version="12.0"
 LABEL release="20191201"
 
-LABEL org.opencontainers.image.created="2020-01-13T23:00:05.327142"
+LABEL org.opencontainers.image.created="2020-01-14T23:00:04.847968"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
