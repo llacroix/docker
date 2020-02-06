@@ -19,6 +19,9 @@ RUN set -x; \
             libpq-dev \
             libsasl2-2 \
             libldap-2.4-2 \
+            libxml2 \
+            libxmlsec1 \
+            libxslt1.1 \
             sudo \
             node-less \
             python3-yaml \
@@ -55,10 +58,15 @@ RUN set -x; \
             python3.6-dev \
             libsasl2-dev \
             libldap2-dev  \
+            libxml2-dev \
+            libxmlsec1-dev \
+            libxslt1-dev \
         && pip install -U pip \
         && /usr/bin/env pip install \
             psycogreen \
             num2words  \
+        && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/${ODOO_VERSION}/requirements.txt \
+        && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
@@ -66,6 +74,9 @@ RUN set -x; \
             python3.6-dev \
             libsasl2-dev \
             libldap2-dev \
+            libxml2-dev \
+            libxmlsec1-dev \
+            libxslt1-dev \
         && apt-get autoremove -y \
         && rm -rf /var/lib/apt/lists/*
 
@@ -102,7 +113,7 @@ USER odoo
 LABEL version="12.0"
 LABEL release="20200205"
 
-LABEL org.opencontainers.image.created="2020-02-05T19:12:57.456116"
+LABEL org.opencontainers.image.created="2020-02-05T21:29:42.514049"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

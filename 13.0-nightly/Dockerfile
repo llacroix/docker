@@ -19,6 +19,9 @@ RUN set -x; \
             libpq-dev \
             libsasl2-2 \
             libldap-2.4-2 \
+            libxml2 \
+            libxmlsec1 \
+            libxslt1.1 \
             sudo \
             node-less \
             python3-yaml \
@@ -55,10 +58,15 @@ RUN set -x; \
             python3.6-dev \
             libsasl2-dev \
             libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
+            libxml2-dev \
+            libxmlsec1-dev \
+            libxslt1-dev \
         && pip install -U pip \
         && /usr/bin/env pip install \
             psycogreen \
             num2words  \
+        && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/${ODOO_VERSION}/requirements.txt \
+        && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
@@ -66,6 +74,9 @@ RUN set -x; \
             python3.6-dev \
             libsasl2-dev \
             libldap2-dev \
+            libxml2-dev \
+            libxmlsec1-dev \
+            libxslt1-dev \
         && apt-get autoremove -y \
         && rm -rf /var/lib/apt/lists/*
 
@@ -102,7 +113,7 @@ USER odoo
 LABEL version="13.0"
 LABEL release="20200205"
 
-LABEL org.opencontainers.image.created="2020-02-05T19:12:57.456409"
+LABEL org.opencontainers.image.created="2020-02-05T21:29:42.514347"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
