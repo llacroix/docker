@@ -24,7 +24,7 @@ RUN set -x; \
             libxslt1.1 \
             sudo \
             node-less \
-            python3-yaml \
+            # python3-yaml \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
         # && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1 \
@@ -64,7 +64,7 @@ RUN set -x; \
         && pip install -U pip \
         && /usr/bin/env pip install \
             psycogreen \
-            num2words  \
+             \
         && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/${ODOO_VERSION}/requirements.txt \
         && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
@@ -113,7 +113,7 @@ USER odoo
 LABEL version="12.0"
 LABEL release="20200101"
 
-LABEL org.opencontainers.image.created="2020-02-05T21:29:42.512521"
+LABEL org.opencontainers.image.created="2020-02-05T23:11:50.747903"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

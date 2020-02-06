@@ -23,7 +23,7 @@ RUN set -x; \
             libxslt1.1 \
             sudo \
             node-less \
-            python-yaml \
+            # python-yaml \
         && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb \
         && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
         && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
@@ -59,7 +59,7 @@ RUN set -x; \
         && pip install -U pip \
         && /usr/bin/env pip install \
             psycogreen \
-            num2words pathlib2 \
+            pathlib2 \
         && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/9.0/requirements.txt \
         && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/9.0/nightly/src/${ODOO_ARCHIVE} \
@@ -110,7 +110,7 @@ USER odoo
 LABEL version="9.0c"
 LABEL release="20190424"
 
-LABEL org.opencontainers.image.created="2020-02-05T21:29:42.511566"
+LABEL org.opencontainers.image.created="2020-02-05T23:11:50.746891"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

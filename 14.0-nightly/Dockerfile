@@ -24,7 +24,7 @@ RUN set -x; \
             libxslt1.1 \
             sudo \
             node-less \
-            python3-yaml \
+            # python3-yaml \
         && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 \
         # && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2 \
         && update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1 \
@@ -57,14 +57,14 @@ RUN set -x; \
             build-essential \
             python3.6-dev \
             libsasl2-dev \
-            libldap2-dev python3-babel python3-chardet python3-dateutil python3-decorator python3-docutils python3-feedparser python3-html2text python3-pil python3-jinja2 python3-libsass python3-lxml python3-mako python3-mock python3-passlib python3-polib  python3-psutil python3-psycopg2 python3-pydot python3-pyparsing python3-pypdf2 python3-qrcode python3-reportlab python3-requests python3-suds python3-tz python3-vatnumber python3-vobject python3-werkzeug python3-xlsxwriter python3-xlrd python3-pyldap \
+            libldap2-dev  \
             libxml2-dev \
             libxmlsec1-dev \
             libxslt1-dev \
         && pip install -U pip \
         && /usr/bin/env pip install \
             psycogreen \
-            num2words  \
+             \
         && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/master/requirements.txt \
         && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/master/nightly/src/${ODOO_ARCHIVE} \
@@ -113,7 +113,7 @@ USER odoo
 LABEL version="14.0"
 LABEL release="20200205"
 
-LABEL org.opencontainers.image.created="2020-02-05T21:29:42.514842"
+LABEL org.opencontainers.image.created="2020-02-05T23:11:50.750175"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
