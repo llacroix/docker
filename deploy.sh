@@ -1,5 +1,5 @@
 docker login
-version=(8 9 10 11 12 13)
+version=(8 9 10 11 12 13 14)
 repo="llacroix/odoo"
 
 for version in "${version[@]}"
@@ -11,7 +11,7 @@ do
     cd ..
 done
 
-version=(10 11 12 13)
+version=(10 11 12 13 14)
 for version in "${version[@]}"
 do
     cd "${version}.0"
