@@ -22,7 +22,7 @@
     version_path = "9.0"
     release = "20190424"
     template = "Dockerfile27.template"
-    apt_packages = "ruby-sass"
+    apt_packages = "ruby-sass libjpeg-dev"
     module_name = "openerp"
     pip_packages = "pathlib2"
 
