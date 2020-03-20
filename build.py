@@ -6,7 +6,11 @@ import os
 import shutil
 
 FORMAT = "%Y%m%d"
-CUR_DATE = datetime.now().strftime(FORMAT)
+
+if 'CUR_DATE' in os.environ:
+    CUR_DATE = os.environ['CUR_DATE']
+else:
+    CUR_DATE = datetime.now().strftime(FORMAT)
 
 templates = {}
 
