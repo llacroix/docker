@@ -49,7 +49,7 @@ RUN set -x; \
 ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 14.0
-ENV ODOO_RELEASE=20200501
+ENV ODOO_RELEASE=20200313
 ARG ODOO_ARCHIVE=odoo_14.0alpha1.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -67,8 +67,7 @@ RUN set -x; \
              \
         && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/master/requirements.txt \
         && pip install -r requirements.txt \
-        && /usr/bin/env pip install https://nightly.odoo.com/master/nightly/src/${ODOO_ARCHIVE} \
-        && cd / \
+        && rm requirements.txt \
         && apt-get --purge remove -y \
             build-essential \
             python3.6-dev \
@@ -80,8 +79,6 @@ RUN set -x; \
         && apt-get autoremove -y \
         && rm -rf /var/lib/apt/lists/*
 
-VOLUME /etc/odoo
-VOLUME /var/lib/odoo
 
 COPY ./odoo.conf /etc/odoo/
 COPY ./entrypoint.py /
@@ -95,7 +92,22 @@ RUN mkdir /addons \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
+    && chown -R odoo:odoo /var/lib/odoo \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /sudo-entrypoint.py" >> /etc/sudoers
+
+USER odoo
+WORKDIR /var/lib/odoo
+
+RUN set -x; \
+    cd /var/lib/odoo \
+    && pip install -U pip \
+    && /usr/bin/env pip install https://nightly.odoo.com/master/nightly/src/${ODOO_ARCHIVE} \
+    && cd .local/lib/python3.6/site-packages/odoo/addons \
+    && find . -maxdepth 1 ! -regex "\(\.\/web\|\.\/base\|\.\|\.\.\)" -type d -exec rm -rf {} \;
+
+
+VOLUME /etc/odoo
+VOLUME /var/lib/odoo
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/python3.6/dist-packages/odoo/addons
@@ -108,19 +120,17 @@ ENV DEPLOYMENT_AREA undefined
 expose 8069
 expose 8071
 
-USER odoo
-
 LABEL version="14.0"
-LABEL release="20200501"
+LABEL release="20200313"
 
-LABEL org.opencontainers.image.created="2020-05-01T15:09:21.630724"
+LABEL org.opencontainers.image.created="2020-05-01T15:09:21.631026"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.source="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.version="14.0"
 LABEL org.opencontainers.image.vendor="ArcheTI"
-LABEL org.opencontainers.image.ref.name="14.0-nightly"
+LABEL org.opencontainers.image.ref.name="14.0-tiny"
 LABEL org.opencontainers.image.title="Odoo 14.0"
 LABEL org.opencontainers.image.description="Full featured odoo image that make odoo deployment fun and secure."
 
