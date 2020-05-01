@@ -48,7 +48,7 @@
 
 [odoo."14.0"]
     version = "14.0"
-    release = "20200101"
+    release = "20200313"
     filename = "odoo_14.0alpha1.${ODOO_RELEASE}"
     version_path = "master"
 
@@ -70,4 +70,11 @@
 [odoo."14.0-nightly"]
     version = "14.0"
     filename = "odoo_14.0alpha1.${ODOO_RELEASE}"
+    version_path = "master"
+
+[odoo."14.0-tiny"]
+    version = "14.0"
+    release = "20200313"
+    filename = "odoo_14.0alpha1.${ODOO_RELEASE}"
+    template = "DockerfileTiny.template"
     version_path = "master"
