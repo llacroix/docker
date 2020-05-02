@@ -19,9 +19,12 @@ from passlib.context import CryptContext
 try:
     from pip._internal.network.session import PipSession
     from pip._internal.req.req_file import parse_requirements
+    from pip._internal.req.constructors import install_req_from_parsed_requirement
 except Exception:
     from pip.download import PipSession
     from pip.req.req_file import parse_requirements
+    install_req_from_parsed_requirement = lambda req: req
+
 from collections import defaultdict
 
 try:
@@ -66,7 +69,8 @@ def merge_requirements(files):
     links = set()
 
     for filename in files:
-        for requirement in parse_requirements(filename, session=PipSession()):
+        for parsed_requirement in parse_requirements(filename, session=PipSession()):
+            requirement = install_req_from_parsed_requirement(parsed_requirement)
             if not hasattr(requirement.req, 'name'):
                 links.add(requirement.link.url)
                 break
