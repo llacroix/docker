@@ -35,16 +35,16 @@
 
 [odoo."11.0"]
     version = "11.0"
-    release = "20200313"
+    release = "20200623"
     apt_packages = "ruby-sass"
 
 [odoo."12.0"]
     version = "12.0"
-    release = "20200313"
+    release = "20200623"
 
 [odoo."13.0"]
     version = "13.0"
-    release = "20200313"
+    release = "20200623"
 
 [odoo."14.0"]
     version = "14.0"
