@@ -137,3 +137,5 @@ TODO:
 - [ ] Automatically detect modules that should get update on boot. For example, you want to start
       odoo and always update a certain set of modules or a certain set of addons repository.
 - [ ] Automatically detect server wide modules
+- [ ] Remove Dockerfiles for a continuous integration script. Dockerfile should be automatically generated
+      then have image built by CI then pushed to different registry.
