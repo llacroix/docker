@@ -1,29 +1,33 @@
 #!/usr/bin/env python
-import argparse
+# import argparse
 import time
 import shlex
 import subprocess
 import sys
 import glob
-import pip
+# import pip
 import re
 import string
 import random
 
 import os
 from os import path
-from os.path import expanduser
+# from os.path import expanduser
 import signal
 from passlib.context import CryptContext
 
 try:
     from pip._internal.network.session import PipSession
     from pip._internal.req.req_file import parse_requirements
-    from pip._internal.req.constructors import install_req_from_parsed_requirement
+    from pip._internal.req.constructors import (
+        install_req_from_parsed_requirement
+    )
 except Exception:
     from pip.download import PipSession
     from pip.req.req_file import parse_requirements
-    install_req_from_parsed_requirement = lambda req: req
+
+    def install_req_from_parsed_requirement(req):
+        return req
 
 from collections import defaultdict
 
@@ -62,6 +66,8 @@ class Requirement(object):
     def __init__(self):
         self.extras = set()
         self.specifiers = set()
+        self.links = set()
+        self.editable = False
 
 
 def merge_requirements(files):
@@ -69,8 +75,11 @@ def merge_requirements(files):
     links = set()
 
     for filename in files:
-        for parsed_requirement in parse_requirements(filename, session=PipSession()):
-            requirement = install_req_from_parsed_requirement(parsed_requirement)
+        f_requirements = parse_requirements(filename, session=PipSession())
+        for parsed_requirement in f_requirements:
+            requirement = install_req_from_parsed_requirement(
+                parsed_requirement
+            )
             if not hasattr(requirement.req, 'name'):
                 links.add(requirement.link.url)
                 break
@@ -79,12 +88,18 @@ def merge_requirements(files):
             extras = requirement.req.extras
             requirements[name].extras |= set(extras)
             requirements[name].specifiers |= set(specifiers)
+            if requirement.link:
+                requirements[name].links |= {requirement.link.url}
+            requirements[name].editable |= requirement.editable
 
     result = []
     for key, value in requirements.items():
-        if not value.extras:
-
-            result.append("%s %s" % (key, ",".join(map(str, value.specifiers))))
+        if value.links:
+            result.append("%s" % value.links.pop())
+        elif not value.extras:
+            result.append(
+                "%s %s" % (key, ",".join(map(str, value.specifiers)))
+            )
         else:
             result.append("%s [%s] %s" % (
                 key,
@@ -96,6 +111,7 @@ def merge_requirements(files):
         result.append(link)
 
     return "\n".join(result)
+
 
 def pipe(args):
     """
@@ -145,18 +161,8 @@ def call_sudo_entrypoint():
     command = ["sudo", "-H", "-E"]
     args = ["/sudo-entrypoint.py"]
 
-    #env_args = [
-    #    "%s=%s" % (key, value)
-    #    for key, value in os.environ.items()
-    #]
+    ret = pipe(command + args)
 
-    ret = pipe(
-        command +
-        #env_args +
-        args
-    )
-
-    #ret = pipe(["sudo", "-E", "-H", "/sudo-entrypoint.py"])
     return ret
 
 
@@ -184,10 +190,6 @@ def install_python_dependencies():
     for requirements in requirement_files:
         print("Installing python packages from %s" % requirements)
         flush_streams()
-        # pip.main(['install', '-r', requirements])
-        #pipe(["pip", "install", "-r", requirements])
-        #print("Done")
-        #flush_streams()
 
     print(data)
     flush_streams()
@@ -340,7 +342,8 @@ def setup_environ(config_path):
         ('PGDATABASE', 'database', 'd')
     ]
 
-    # Accpet db_password only with this if some infra cannot be setup otherwise...
+    # Accpet db_password only with this if some infra cannot be setup
+    # otherwise...
     # It's a bad idea to pass password in cleartext in command line or
     # environment variables so please use .pgpass instead...
     if os.environ.get('I_KNOW_WHAT_IM_DOING') == 'TRUE':
