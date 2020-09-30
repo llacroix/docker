@@ -49,8 +49,8 @@ RUN set -x; \
 ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 14.0
-ENV ODOO_RELEASE=20200929
-ARG ODOO_ARCHIVE=odoo_14.0alpha1.${ODOO_RELEASE}.tar.gz
+ENV ODOO_RELEASE=20200930
+ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
@@ -65,9 +65,9 @@ RUN set -x; \
         && /usr/bin/env pip install \
             psycogreen \
              \
-        && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/master/requirements.txt \
+        && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/${ODOO_VERSION}/requirements.txt \
         && pip install -r requirements.txt \
-        && /usr/bin/env pip install https://nightly.odoo.com/master/nightly/src/${ODOO_ARCHIVE} \
+        && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
         && apt-get --purge remove -y \
             build-essential \
@@ -111,9 +111,9 @@ expose 8071
 USER odoo
 
 LABEL version="14.0"
-LABEL release="20200929"
+LABEL release="20200930"
 
-LABEL org.opencontainers.image.created="2020-09-29T23:00:05.185129"
+LABEL org.opencontainers.image.created="2020-09-30T23:00:04.278652"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
