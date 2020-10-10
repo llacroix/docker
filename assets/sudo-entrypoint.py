@@ -102,8 +102,9 @@ def disable_base_modules():
 
 
 def fix_access_rights():
-    pipe(["chown", "-R", "odoo:odoo", "/var/lib/odoo"])
-    pipe(["chown", "-R", "odoo:odoo", "/etc/odoo"])
+    if os.environ.get('RESET_ACCESS_RIGHTS', '') == 'TRUE':
+        pipe(["chown", "-R", "odoo:odoo", "/var/lib/odoo"])
+        pipe(["chown", "-R", "odoo:odoo", "/etc/odoo"])
 
 
 def remove_sudo():
