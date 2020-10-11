@@ -123,7 +123,7 @@ expose 8071
 LABEL version="14.0"
 LABEL release="20201009"
 
-LABEL org.opencontainers.image.created="2020-10-10T23:00:03.757961"
+LABEL org.opencontainers.image.created="2020-10-11T23:00:03.940491"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
