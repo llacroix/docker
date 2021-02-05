@@ -45,6 +45,7 @@ NAME                      | Definition
 `ODOO_RELEASE`            | Odoo release as defined in the image for example: 20191020
 `ODOO_BASE_PATH`          | Base path for odoo addons installed by pip.
 `ODOO_DISABLED_MODULES`   | Comma separated list of core odoo modules to remove from path. This is useful when you have customization made to core modules inside your personal addons path.
+`RESET_ACCESS_RIGHTS`     | Set to TRUE to reset access rights on startup. It is disabled by default due to how slow it can be.
                                        
     
 
@@ -134,8 +135,10 @@ TODO:
 - [x] Automatically build addons path parameters based on folders in `/addons/*` and environment 
       variables.
 - [x] Improve labels to conform with https://github.com/opencontainers/image-spec/blob/master/annotations.md
-- [ ] Automatically detect modules that should get update on boot. For example, you want to start
-      odoo and always update a certain set of modules or a certain set of addons repository.
-- [ ] Automatically detect server wide modules
+- [x] -Automatically detect modules that should get update on boot. For example, you want to start
+      odoo and always update a certain set of modules or a certain set of addons repository.-
+      This shouldn't be handled by this project.
+- [x] Automatically detect server wide modules
+- [x] Refactor the deploy/build script in an unified script
 - [ ] Remove Dockerfiles for a continuous integration script. Dockerfile should be automatically generated
       then have image built by CI then pushed to different registry.

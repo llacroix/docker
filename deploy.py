@@ -39,6 +39,14 @@ def get_parser():
     )
 
     parser.add_argument(
+        '--no-cache',
+        dest='no_cache',
+        action='store_true',
+        help="No cache used to build image",
+        default=False
+    )
+
+    parser.add_argument(
         '--repository',
         dest="repository",
         help="Repository to push to or in other words the project name",
@@ -223,9 +231,14 @@ def build_docker_image(args, odoo_config, version):
     local_tag = 'local-odoo:{}'.format(version)
     print("Building image {}".format(local_tag))
 
-    build_success = run(
-        ['docker', 'build', '-t', local_tag, '.'], args.verbose
-    )
+    params = ['docker', 'build']
+
+    if args.no_cache:
+        params += ['--no-cache']
+
+    params += ['-t', local_tag, '.']
+
+    build_success = run(params, args.verbose)
 
     if args.push and build_success == 0:
         remote_tag = '{}/{}:{}'.format(
