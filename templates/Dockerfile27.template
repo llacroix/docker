@@ -61,6 +61,7 @@ RUN set -x; \
             psycogreen \
             %(pip_packages)s \
         && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/%(version_path)s/requirements.txt \
+        && pip install -U pip \
         && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/%(version_path)s/nightly/src/${ODOO_ARCHIVE} \
         && cd / \

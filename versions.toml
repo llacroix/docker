@@ -20,7 +20,7 @@
 [odoo."9.0"]
     version = "9.0c"
     version_path = "9.0"
-    release = "20190424"
+    release = "20190401"
     template = "Dockerfile27.template"
     apt_packages = "ruby-sass libjpeg-dev"
     module_name = "openerp"
@@ -48,7 +48,7 @@
 
 [odoo."14.0"]
     version = "14.0"
-    release = "20201009"
+    release = "20210128"
     #filename = "odoo_14.0alpha1.${ODOO_RELEASE}"
     # version_path = "master"
 
