@@ -44,7 +44,7 @@ RUN set -x; \
 ENV PATH=/usr/local/bin:$PATH
 # Install Odoo Including things from sources
 ENV ODOO_VERSION 9.0c
-ENV ODOO_RELEASE=20190424
+ENV ODOO_RELEASE=20190401
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
         apt-get update \
@@ -61,6 +61,7 @@ RUN set -x; \
             psycogreen \
             pathlib2 \
         && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/9.0/requirements.txt \
+        && pip install -U pip \
         && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/9.0/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
@@ -108,9 +109,9 @@ expose 8071
 USER odoo
 
 LABEL version="9.0c"
-LABEL release="20190424"
+LABEL release="20190401"
 
-LABEL org.opencontainers.image.created="2021-02-04T23:00:04.326024"
+LABEL org.opencontainers.image.created="2021-02-05T23:00:06.322264"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

@@ -23,11 +23,15 @@ def pipe(args):
     """
     Call the process with std(in,out,err)
     """
+    env = os.environ.copy()
+    env['DEBIAN_FRONTEND'] = 'noninteractive'
+
     process = subprocess.Popen(
         args,
         stdin=sys.stdin,
         stdout=sys.stdout,
         stderr=sys.stderr,
+        env=env
     )
 
     process.wait()

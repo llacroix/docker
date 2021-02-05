@@ -61,6 +61,7 @@ RUN set -x; \
             psycogreen \
             pathlib2 \
         && curl -o requirements.txt https://raw.githubusercontent.com/odoo/odoo/${ODOO_VERSION}/requirements.txt \
+        && pip install -U pip \
         && pip install -r requirements.txt \
         && /usr/bin/env pip install https://nightly.odoo.com/${ODOO_VERSION}/nightly/src/${ODOO_ARCHIVE} \
         && cd / \
@@ -110,7 +111,7 @@ USER odoo
 LABEL version="8.0"
 LABEL release="20171001"
 
-LABEL org.opencontainers.image.created="2021-02-04T23:00:04.325317"
+LABEL org.opencontainers.image.created="2021-02-05T23:00:06.321576"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
