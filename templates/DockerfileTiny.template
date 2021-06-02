@@ -83,6 +83,8 @@ RUN set -x; \
 COPY ./%(config)s /etc/odoo/
 COPY ./%(entrypoint)s /
 COPY ./sudo-%(entrypoint)s /
+COPY ./find_modules.py /scripts/find_modules.py
+COPY ./prepare_project.py /scripts/prepare_project.py
 
 ARG UID=%(uid)d
 ARG GID=%(gid)d

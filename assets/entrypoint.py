@@ -15,6 +15,7 @@ from os import path
 # from os.path import expanduser
 import signal
 from passlib.context import CryptContext
+from pathlib import Path
 
 try:
     from pip._internal.network.session import PipSession
@@ -309,6 +310,18 @@ def get_dirs(cur_path):
     ]
 
 
+def get_extra_paths():
+    extra_paths = os.environ.get('ODOO_EXTRA_PATHS')
+
+    if not extra_paths:
+        return []
+
+    return [
+        extra_path.strip()
+        for extra_path in extra_paths.split(',')
+    ]
+
+
 def setup_addons_paths(config_path):
     base_addons = os.environ.get('ODOO_BASE_PATH')
 
@@ -317,6 +330,8 @@ def setup_addons_paths(config_path):
     valid_paths = [base_addons]
 
     addons_paths = get_dirs('/addons')
+    addons_paths += get_extra_paths()
+
     for addons_path in addons_paths:
         print("Lookup addons in %s" % addons_path)
         flush_streams()
@@ -474,7 +489,10 @@ def wait_postgresql():
 
 def main():
     # Install apt package first then python packages
-    ret = call_sudo_entrypoint()
+    if not os.environ.get('SKIP_SUDO_ENTRYPOINT'):
+        ret = call_sudo_entrypoint()
+    else:
+        ret = 0
 
     if ret not in [0, None]:
         sys.exit(ret)
