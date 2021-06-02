@@ -101,6 +101,26 @@ lookup for requirements.txt file in folders located into `/addons/*` and install
 It will also try to install any deb packages defined in apt-packages.txt file it can find in
 the same locations to install debian package available to the ubuntu:bionic distribution.
 
+
+Server Wide Modules
+-------------------
+
+In order to define server wide modules, an extension is used in the manifest by defining the
+property `"server_wide": True`. This will allow odoo to automatically load some modules as
+server wide. This is unfortunately not perfect as some modules should not be in the path
+of addons unless you want to use them. Server Wide modules don't have to be installed and
+having a server wide module is similar as loading it while not installing it by default.
+
+That feature should be used at your own risk and might be disabled by default in the future
+in order to prevent some "bad" players to abuse the `server_wide` attribute if it was
+to become more popular.
+
+Ideally, modules should be staged in folders that let you install them while keeping them out
+of the `addons_path`. Odoo should be able to introspect and move them into the addons path...
+
+Yet in a multi-database setup, this makes little sense as each instance may or may not want
+to have some server wide modules available. 
+
 Warning
 =======
 
@@ -113,7 +133,26 @@ Until the development gets more stable, consider trying it out in test before pu
 How to build new images:
 ========================
 
-Run the script `build.py` to generate the Dockerfile based on the versions.toml file.
+Run the script `deploy.py` to generate the Dockerfile based on the versions.toml file.
+
+
+For example to rebuild all configurations in the current folder without rebuilding images.
+
+    python deploy.py --verbose --no-push --no-build-image -a -o .
+
+
+In order to push to a registry you have to pass a registry and a repository. The following
+command line will generate the configurations in current folder and push them to the registry
+for each versions defined in `versions.toml`.
+
+   python deploy.py --verbose --registry index.docker.io --repository llacroix/odoo -a -o . 
+
+
+If you need to deploy a specific version of an image you can pass the `-v` parameter. And `--no-push`
+without `--no-build-image` would build the image with the tag `local-odoo:14.0` in this particular case.
+
+   python deploy.py --versbose --no-push -v 14.0 -o .
+
 
 TODO:
 =====
@@ -140,5 +179,5 @@ TODO:
       This shouldn't be handled by this project.
 - [x] Automatically detect server wide modules
 - [x] Refactor the deploy/build script in an unified script
-- [ ] Remove Dockerfiles for a continuous integration script. Dockerfile should be automatically generated
+- [x] Remove Dockerfiles for a continuous integration script. Dockerfile should be automatically generated
       then have image built by CI then pushed to different registry.
