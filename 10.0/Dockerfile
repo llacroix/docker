@@ -82,6 +82,8 @@ VOLUME /var/lib/odoo
 COPY ./odoo.conf /etc/odoo/
 COPY ./entrypoint.py /
 COPY ./sudo-entrypoint.py /
+COPY ./find_modules.py /scripts/find_modules.py
+COPY ./prepare_project.py /scripts/prepare_project.py
 
 ARG UID=1000
 ARG GID=1000
@@ -111,7 +113,7 @@ USER odoo
 LABEL version="10.0"
 LABEL release="20200313"
 
-LABEL org.opencontainers.image.created="2021-02-08T23:00:03.637586"
+LABEL org.opencontainers.image.created="2021-06-02T10:20:54.176641"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"

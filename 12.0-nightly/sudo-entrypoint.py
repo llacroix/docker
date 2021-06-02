@@ -12,6 +12,7 @@ import stat
 from os import path
 from os.path import expanduser
 import shutil
+from pathlib import Path
 
 try:
     from pathlib import Path
@@ -38,6 +39,35 @@ def pipe(args):
 
     return process.returncode
 
+def get_dirs(cur_path):
+    return [
+        path.join(cur_path, npath)
+        for npath in os.listdir(cur_path)
+        if path.isdir(path.join(cur_path, npath))
+    ]
+
+
+def get_extra_paths():
+    extra_paths = os.environ.get('ODOO_EXTRA_PATHS')
+
+    if not extra_paths:
+        return []
+
+    return [
+        extra_path.strip()
+        for extra_path in extra_paths.split(',')
+    ]
+
+
+def get_addons_paths():
+    addons = get_dirs('/addons')
+    addons += get_extra_paths()
+
+    return [
+        Path(path)
+        for path in addons
+    ]
+
 
 def install_apt_packages():
     """
@@ -45,11 +75,12 @@ def install_apt_packages():
     """
     package_list = set()
 
-    for packages in glob.glob("/addons/**/apt-packages.txt"):
-        print("Installing packages from %s" % packages)
-        with open(packages, 'r') as pack_file:
-            lines = [line.strip() for line in pack_file]
-            package_list.update(set(lines))
+    for addons_path in get_addons_paths():
+        for packages in addons_path.glob('**/apt-packages.txt'):
+            print("Installing packages from %s" % packages)
+            with open(packages, 'r') as pack_file:
+                lines = [line.strip() for line in pack_file]
+                package_list.update(set(lines))
 
     if len(package_list) > 0:
         ret = pipe(['apt-get', 'update'])

@@ -15,6 +15,7 @@ from os import path
 # from os.path import expanduser
 import signal
 from passlib.context import CryptContext
+from pathlib import Path
 
 try:
     from pip._internal.network.session import PipSession
@@ -166,6 +167,46 @@ def call_sudo_entrypoint():
     return ret
 
 
+def get_all_manifests():
+    odoo_manifests = glob.glob('/addons/**/__manifest__.py', recursive=True)
+    erp_manifest = glob.glob('/addons/**/__openerp__.py', recursive=True)
+
+    return odoo_manifests + erp_manifest
+
+
+def module_name(manifest_file):
+    return path.basename(path.dirname(manifest_file))
+
+
+def get_module(manifest_file):
+    with open(manifest_file) as manifest_in:
+        try:
+            code = compile(manifest_in.read(), '__manifest__', 'eval')
+            module = eval(code, {}, {})
+        except Exception:
+            module = {}
+
+    return module
+
+
+def is_installable(manifest):
+    return manifest.get('installable', True)
+
+
+def is_server_wide(manifest):
+    return manifest.get('server_wide', False)
+
+
+def get_server_wide_modules(manifests):
+    base_server_wide_modules = ['base', 'web']
+    custom_server_wide_modules = [
+        module_name(filename)
+        for filename, module in manifests.items()
+        if is_server_wide(module)
+    ]
+    return base_server_wide_modules + custom_server_wide_modules
+
+
 def install_python_dependencies():
     """
     Install all the requirements.txt file found
@@ -176,7 +217,9 @@ def install_python_dependencies():
     # then append the specs to the loaded requirements and dump
     # the requirements.txt file in /var/lib/odoo/requirements.txt and
     # then install this only file instead of calling multiple time pip
-    requirement_files = glob.glob("/addons/**/requirements.txt")
+    requirement_files = glob.glob(
+        "/addons/**/requirements.txt", recursive=True
+    )
     requirement_files.sort()
 
     print("Installing python requirements found in:")
@@ -267,6 +310,18 @@ def get_dirs(cur_path):
     ]
 
 
+def get_extra_paths():
+    extra_paths = os.environ.get('ODOO_EXTRA_PATHS')
+
+    if not extra_paths:
+        return []
+
+    return [
+        extra_path.strip()
+        for extra_path in extra_paths.split(',')
+    ]
+
+
 def setup_addons_paths(config_path):
     base_addons = os.environ.get('ODOO_BASE_PATH')
 
@@ -275,6 +330,8 @@ def setup_addons_paths(config_path):
     valid_paths = [base_addons]
 
     addons_paths = get_dirs('/addons')
+    addons_paths += get_extra_paths()
+
     for addons_path in addons_paths:
         print("Lookup addons in %s" % addons_path)
         flush_streams()
@@ -301,6 +358,41 @@ def setup_addons_paths(config_path):
     config.set('options', 'addons_path', ",".join(valid_paths))
     with open(config_path, 'w') as out:
         config.write(out)
+
+    flush_streams()
+
+
+def setup_server_wide_modules(config_path):
+    print("Searching for server wide modules")
+    all_manifests = get_all_manifests()
+
+    print("Found %s modules" % (len(all_manifests)))
+
+    manifests = {
+        filename: get_module(filename)
+        for filename in all_manifests
+    }
+
+    installable_manifests = {
+        filename: module
+        for filename, module in manifests.items()
+        if is_installable(module)
+    }
+
+    print("Found %s installable modules " % (len(installable_manifests),))
+
+    server_wide_modules = get_server_wide_modules(installable_manifests)
+
+    if len(server_wide_modules) > 2:
+        modules = ",".join(server_wide_modules)
+        print("Setting server wide modules to %s" % (modules))
+        config = ConfigParser()
+        config.read(config_path)
+        config.set('options', 'server_wide_modules', modules)
+        with open(config_path, 'w') as out:
+            config.write(out)
+    else:
+        print("No server wide modules found")
 
     flush_streams()
 
@@ -397,7 +489,10 @@ def wait_postgresql():
 
 def main():
     # Install apt package first then python packages
-    ret = call_sudo_entrypoint()
+    if not os.environ.get('SKIP_SUDO_ENTRYPOINT'):
+        ret = call_sudo_entrypoint()
+    else:
+        ret = 0
 
     if ret not in [0, None]:
         sys.exit(ret)
@@ -407,6 +502,7 @@ def main():
     install_master_password(os.environ.get('ODOO_RC'))
     setup_environ(os.environ.get('ODOO_RC'))
     setup_addons_paths(os.environ.get('ODOO_RC'))
+    setup_server_wide_modules(os.environ.get('ODOO_RC'))
 
     if not os.environ.get('ODOO_SKIP_POSTGRES_WAIT'):
         wait_postgresql()
