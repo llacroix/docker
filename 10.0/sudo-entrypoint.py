@@ -12,7 +12,6 @@ import stat
 from os import path
 from os.path import expanduser
 import shutil
-from pathlib import Path
 
 try:
     from pathlib import Path
@@ -38,6 +37,7 @@ def pipe(args):
     process.wait()
 
     return process.returncode
+
 
 def get_dirs(cur_path):
     return [
@@ -75,14 +75,27 @@ def install_apt_packages():
     """
     package_list = set()
 
-    for addons_path in get_addons_paths():
+    paths = get_addons_paths()
+
+    print("Looking up for packages in {}".format(paths))
+
+    for addons_path in paths:
         for packages in addons_path.glob('**/apt-packages.txt'):
             print("Installing packages from %s" % packages)
             with open(packages, 'r') as pack_file:
                 lines = [line.strip() for line in pack_file]
                 package_list.update(set(lines))
 
+    extras = os.environ.get('EXTRA_APT_PACKAGES', '')
+    print(f"Adding extra packages {extras}")
+    if extras:
+        for package in extras.split(','):
+            if not package:
+                continue
+            package_list.add(package)
+
     if len(package_list) > 0:
+        print(f"Installing {package_list}")
         ret = pipe(['apt-get', 'update'])
 
         # Something went wrong, stop the service as it's failing

@@ -15,7 +15,12 @@ from os import path
 # from os.path import expanduser
 import signal
 from passlib.context import CryptContext
-from pathlib import Path
+from contextlib import contextmanager
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
 
 try:
     from pip._internal.network.session import PipSession
@@ -76,11 +81,17 @@ def merge_requirements(files):
     links = set()
 
     for filename in files:
-        f_requirements = parse_requirements(filename, session=PipSession())
+        f_requirements = parse_requirements(
+            str(filename), session=PipSession()
+        )
         for parsed_requirement in f_requirements:
             requirement = install_req_from_parsed_requirement(
                 parsed_requirement
             )
+
+            if requirement.markers and not requirement.markers.evaluate():
+                continue
+
             if not hasattr(requirement.req, 'name'):
                 links.add(requirement.link.url)
                 break
@@ -207,7 +218,7 @@ def get_server_wide_modules(manifests):
     return base_server_wide_modules + custom_server_wide_modules
 
 
-def install_python_dependencies():
+def install_python_dependencies(valid_paths):
     """
     Install all the requirements.txt file found
     """
@@ -217,16 +228,23 @@ def install_python_dependencies():
     # then append the specs to the loaded requirements and dump
     # the requirements.txt file in /var/lib/odoo/requirements.txt and
     # then install this only file instead of calling multiple time pip
-    requirement_files = glob.glob(
-        "/addons/**/requirements.txt", recursive=True
-    )
+    # all_paths = ['/addons'] + get_extra_paths()
+
+    requirement_files = []
+
+    for addons_path in valid_paths:
+        cur_path = Path(addons_path)
+        requirement_files += cur_path.glob("**/requirements.txt")
+
+    requirement_files = list(set(requirement_files))
     requirement_files.sort()
 
     print("Installing python requirements found in:")
-    print("    \n".join(requirement_files))
+    for f_path in requirement_files:
+        print("    {}".format(str(f_path)))
 
-    req_file = '/var/lib/odoo/requirements.txt'
-    with open(req_file, 'w') as fout:
+    req_file = Path('/var/lib/odoo/requirements.txt')
+    with req_file.open('w') as fout:
         data = merge_requirements(requirement_files)
         fout.write(data)
 
@@ -238,8 +256,11 @@ def install_python_dependencies():
     flush_streams()
 
     os.environ['PATH'] = "/var/lib/odoo/.local/bin:%s" % (os.environ['PATH'],)
-    pipe(["pip", "install", "--user", "-r", req_file])
+    retcode = pipe(["pip", "install", "--user", "-r", str(req_file)])
     flush_streams()
+
+    if os.environ.get('ODOO_STRICT_MODE') and retcode != 0:
+        raise Exception("Failed to install pip dependencies")
 
     print("Installing python requirements complete\n")
     flush_streams()
@@ -251,7 +272,7 @@ def randomString(stringLength=10):
     return ''.join(random.choice(letters) for i in range(stringLength))
 
 
-def install_master_password(config_path):
+def install_master_password(config):
     # Secure an odoo instance with a default master password
     # if required we can update the master password but at least
     # odoo doesn't get exposed by default without master passwords
@@ -261,8 +282,6 @@ def install_master_password(config_path):
         ['pbkdf2_sha512', 'plaintext'],
         deprecated=['plaintext']
     )
-    config = ConfigParser()
-    config.read(config_path)
 
     master_password_secret = "/run/secrets/master_password"
     if path.exists(master_password_secret):
@@ -294,9 +313,6 @@ def install_master_password(config_path):
 
     config.set('options', 'admin_passwd', master_password)
 
-    with open(config_path, 'w') as out:
-        config.write(out)
-
     print("Installing master password completed")
 
     flush_streams()
@@ -322,10 +338,10 @@ def get_extra_paths():
     ]
 
 
-def setup_addons_paths(config_path):
+def get_valid_paths():
     base_addons = os.environ.get('ODOO_BASE_PATH')
 
-    addons = os.listdir('/addons')
+    # addons = os.listdir('/addons')
 
     valid_paths = [base_addons]
 
@@ -353,16 +369,15 @@ def setup_addons_paths(config_path):
             print("No addons found in path. Skipping...")
             flush_streams()
 
-    config = ConfigParser()
-    config.read(config_path)
-    config.set('options', 'addons_path', ",".join(valid_paths))
-    with open(config_path, 'w') as out:
-        config.write(out)
+    return valid_paths
 
+
+def setup_addons_paths(config, valid_paths):
+    config.set('options', 'addons_path', ",".join(valid_paths))
     flush_streams()
 
 
-def setup_server_wide_modules(config_path):
+def setup_server_wide_modules(config):
     print("Searching for server wide modules")
     all_manifests = get_all_manifests()
 
@@ -386,21 +401,15 @@ def setup_server_wide_modules(config_path):
     if len(server_wide_modules) > 2:
         modules = ",".join(server_wide_modules)
         print("Setting server wide modules to %s" % (modules))
-        config = ConfigParser()
-        config.read(config_path)
         config.set('options', 'server_wide_modules', modules)
-        with open(config_path, 'w') as out:
-            config.write(out)
     else:
         print("No server wide modules found")
 
     flush_streams()
 
 
-def setup_environ(config_path):
+def setup_environ(config):
     print("Configuring environment variables for postgresql")
-    config = ConfigParser()
-    config.read(config_path)
 
     def get_option(config, section, name):
         try:
@@ -487,6 +496,17 @@ def wait_postgresql():
         sys.exit(1)
 
 
+@contextmanager
+def get_config(config_path):
+    config = ConfigParser()
+    config.read(config_path)
+
+    yield config
+
+    with config_path.open('w') as out:
+        config.write(out)
+
+
 def main():
     # Install apt package first then python packages
     if not os.environ.get('SKIP_SUDO_ENTRYPOINT'):
@@ -498,11 +518,17 @@ def main():
         sys.exit(ret)
 
     # Install python packages with pip in user home
-    install_python_dependencies()
-    install_master_password(os.environ.get('ODOO_RC'))
-    setup_environ(os.environ.get('ODOO_RC'))
-    setup_addons_paths(os.environ.get('ODOO_RC'))
-    setup_server_wide_modules(os.environ.get('ODOO_RC'))
+    valid_paths = get_valid_paths()
+
+    config_path = Path(os.environ.get('ODOO_RC', '/etc/odoo/odoo.cfg'))
+
+    with get_config(config_path) as config:
+        if not os.environ.get('SKIP_PIP'):
+            install_python_dependencies(valid_paths)
+        install_master_password(config)
+        setup_environ(config)
+        setup_addons_paths(config, valid_paths)
+        setup_server_wide_modules(config)
 
     if not os.environ.get('ODOO_SKIP_POSTGRES_WAIT'):
         wait_postgresql()
