@@ -46,6 +46,8 @@ NAME                      | Definition
 `ODOO_BASE_PATH`          | Base path for odoo addons installed by pip.
 `ODOO_DISABLED_MODULES`   | Comma separated list of core odoo modules to remove from path. This is useful when you have customization made to core modules inside your personal addons path.
 `RESET_ACCESS_RIGHTS`     | Set to TRUE to reset access rights on startup. It is disabled by default due to how slow it can be.
+`ODOO_EXTRA_PATHS`        | Comma separated list of paths to include that aren't in /addons
+`ODOO_EXCLUDED_PATHS`     | Comma separated list of paths to exclude from the entrypoint. It will exclude the path itself and children.
                                        
     
 

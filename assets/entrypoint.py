@@ -178,11 +178,17 @@ def call_sudo_entrypoint():
     return ret
 
 
-def get_all_manifests():
-    odoo_manifests = glob.glob('/addons/**/__manifest__.py', recursive=True)
-    erp_manifest = glob.glob('/addons/**/__openerp__.py', recursive=True)
+def get_all_manifests(valid_paths):
+    manifests = []
 
-    return odoo_manifests + erp_manifest
+    for found_path in valid_paths:
+        cur_path = Path(found_path)
+        manifests += cur_path.glob('**/__manifest__.py')
+        manifests += cur_path.glob('**/__openerp__.py')
+
+    all_manifets = list(set(manifests))
+
+    return [str(manifest) for manifest in all_manifets]
 
 
 def module_name(manifest_file):
@@ -338,6 +344,15 @@ def get_extra_paths():
     ]
 
 
+def get_excluded_paths():
+    excluded_paths = os.environ.get('ODOO_EXCLUDED_PATHS', '')
+    return [
+        Path(x.strip())
+        for x in excluded_paths.split(',')
+        if x
+    ]
+
+
 def get_valid_paths():
     base_addons = os.environ.get('ODOO_BASE_PATH')
 
@@ -377,9 +392,9 @@ def setup_addons_paths(config, valid_paths):
     flush_streams()
 
 
-def setup_server_wide_modules(config):
+def setup_server_wide_modules(config, valid_paths):
     print("Searching for server wide modules")
-    all_manifests = get_all_manifests()
+    all_manifests = get_all_manifests(valid_paths)
 
     print("Found %s modules" % (len(all_manifests)))
 
@@ -507,6 +522,29 @@ def get_config(config_path):
         config.write(out)
 
 
+def is_subdir_of(path1, path2):
+    try:
+        path2.relative_to(path1)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def filter_valid_paths(paths, excluded_paths):
+    res_paths = []
+
+    for vpath in paths:
+        cur_path = Path(vpath)
+        for ex_path in excluded_paths:
+            if is_subdir_of(ex_path, cur_path):
+                break
+        else:
+            res_paths.append(vpath)
+
+    return res_paths
+
+
 def main():
     # Install apt package first then python packages
     if not os.environ.get('SKIP_SUDO_ENTRYPOINT'):
@@ -518,7 +556,9 @@ def main():
         sys.exit(ret)
 
     # Install python packages with pip in user home
-    valid_paths = get_valid_paths()
+    orig_valid_paths = get_valid_paths()
+    excluded_paths = get_excluded_paths()
+    valid_paths = filter_valid_paths(orig_valid_paths, excluded_paths)
 
     config_path = Path(os.environ.get('ODOO_RC', '/etc/odoo/odoo.cfg'))
 
@@ -528,7 +568,7 @@ def main():
         install_master_password(config)
         setup_environ(config)
         setup_addons_paths(config, valid_paths)
-        setup_server_wide_modules(config)
+        setup_server_wide_modules(config, valid_paths)
 
     if not os.environ.get('ODOO_SKIP_POSTGRES_WAIT'):
         wait_postgresql()
