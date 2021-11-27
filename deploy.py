@@ -277,8 +277,8 @@ def main():
     for version in versions:
         odoo_config = get_config(config, version)
 
-        if 'release' not in odoo_config:
-            odoo_config['release'] = CUR_DATE
+        # if 'release' not in odoo_config:
+        #     odoo_config['release'] = ""
 
         odoo_config['tag'] = version
         odoo_config['created_date'] = datetime.now().isoformat()

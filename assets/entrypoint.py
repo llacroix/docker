@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # import argparse
+from __future__ import print_function
 import time
 import shlex
 import subprocess
@@ -17,25 +18,9 @@ import signal
 from passlib.context import CryptContext
 from contextlib import contextmanager
 
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
-
-try:
-    from pip._internal.network.session import PipSession
-    from pip._internal.req.req_file import parse_requirements
-    from pip._internal.req.constructors import (
-        install_req_from_parsed_requirement
-    )
-except Exception:
-    from pip.download import PipSession
-    from pip.req.req_file import parse_requirements
-
-    def install_req_from_parsed_requirement(req):
-        return req
-
-from collections import defaultdict
+from odoo_tools.compat import Path
+from odoo_tools.modules.search import find_addons_paths, find_modules_paths
+from odoo_tools.configuration.pips import merge_requirements
 
 try:
     # python3
@@ -66,63 +51,6 @@ except Exception:
         # use single quotes, and put single quotes into double quotes
         # the string $'b is then quoted as '$'"'"'b'
         return "'" + s.replace("'", "'\"'\"'") + "'"
-
-
-class Requirement(object):
-    def __init__(self):
-        self.extras = set()
-        self.specifiers = set()
-        self.links = set()
-        self.editable = False
-
-
-def merge_requirements(files):
-    requirements = defaultdict(lambda: Requirement())
-    links = set()
-
-    for filename in files:
-        f_requirements = parse_requirements(
-            str(filename), session=PipSession()
-        )
-        for parsed_requirement in f_requirements:
-            requirement = install_req_from_parsed_requirement(
-                parsed_requirement
-            )
-
-            if requirement.markers and not requirement.markers.evaluate():
-                continue
-
-            if not hasattr(requirement.req, 'name'):
-                links.add(requirement.link.url)
-                break
-            name = requirement.req.name
-            specifiers = requirement.req.specifier
-            extras = requirement.req.extras
-            requirements[name].extras |= set(extras)
-            requirements[name].specifiers |= set(specifiers)
-            if requirement.link:
-                requirements[name].links |= {requirement.link.url}
-            requirements[name].editable |= requirement.editable
-
-    result = []
-    for key, value in requirements.items():
-        if value.links:
-            result.append("%s" % value.links.pop())
-        elif not value.extras:
-            result.append(
-                "%s %s" % (key, ",".join(map(str, value.specifiers)))
-            )
-        else:
-            result.append("%s [%s] %s" % (
-                key,
-                ",".join(map(str, value.extras)),
-                ",".join(map(str, value.specifiers))
-            ))
-
-    for link in links:
-        result.append(link)
-
-    return "\n".join(result)
 
 
 def pipe(args):
@@ -178,48 +106,12 @@ def call_sudo_entrypoint():
     return ret
 
 
-def get_all_manifests(valid_paths):
-    manifests = []
-
-    for found_path in valid_paths:
-        cur_path = Path(found_path)
-        manifests += cur_path.glob('**/__manifest__.py')
-        manifests += cur_path.glob('**/__openerp__.py')
-
-    all_manifets = list(set(manifests))
-
-    return [str(manifest) for manifest in all_manifets]
-
-
-def module_name(manifest_file):
-    return path.basename(path.dirname(manifest_file))
-
-
-def get_module(manifest_file):
-    with open(manifest_file) as manifest_in:
-        try:
-            code = compile(manifest_in.read(), '__manifest__', 'eval')
-            module = eval(code, {}, {})
-        except Exception:
-            module = {}
-
-    return module
-
-
-def is_installable(manifest):
-    return manifest.get('installable', True)
-
-
-def is_server_wide(manifest):
-    return manifest.get('server_wide', False)
-
-
 def get_server_wide_modules(manifests):
     base_server_wide_modules = ['base', 'web']
     custom_server_wide_modules = [
-        module_name(filename)
-        for filename, module in manifests.items()
-        if is_server_wide(module)
+        manifest.technical_name
+        for manifest in manifests
+        if manifest.server_wide
     ]
     return base_server_wide_modules + custom_server_wide_modules
 
@@ -252,7 +144,12 @@ def install_python_dependencies(valid_paths):
     req_file = Path('/var/lib/odoo/requirements.txt')
     with req_file.open('w') as fout:
         data = merge_requirements(requirement_files)
-        fout.write(data)
+        data = "\n".join(data)
+
+        try:
+            fout.write(data)
+        except Exception:
+            fout.write(data.decode('utf-8'))
 
     for requirements in requirement_files:
         print("Installing python packages from %s" % requirements)
@@ -354,64 +251,34 @@ def get_excluded_paths():
 
 
 def get_valid_paths():
-    base_addons = os.environ.get('ODOO_BASE_PATH')
+    base_addons = os.environ['ODOO_BASE_PATH']
 
-    # addons = os.listdir('/addons')
+    base_addons_paths = [base_addons, '/addons']
+    base_addons_paths += get_extra_paths()
 
-    valid_paths = [base_addons]
+    valid_paths = find_addons_paths(base_addons_paths)
 
-    addons_paths = get_dirs('/addons')
-    addons_paths += get_extra_paths()
-
-    for addons_path in addons_paths:
-        print("Lookup addons in %s" % addons_path)
-        flush_streams()
-        addons = get_dirs(addons_path)
-        for addon in addons:
-            files = os.listdir(addon)
-            if (
-                '__init__.py' in files and
-                '__manifest__.py' in files or
-                '__openerp__.py' in files
-            ):
-                valid_paths.append(addons_path)
-                print("Addons found !")
-                flush_streams()
-                break
-        if addons_path in valid_paths:
-            continue
-        else:
-            print("No addons found in path. Skipping...")
-            flush_streams()
+    for valid_path in valid_paths:
+        print("Found installable modules in {}".format(valid_path))
 
     return valid_paths
 
 
 def setup_addons_paths(config, valid_paths):
-    config.set('options', 'addons_path', ",".join(valid_paths))
+    config.set('options', 'addons_path', ",".join([
+        str(path) for path in valid_paths
+    ]))
     flush_streams()
 
 
 def setup_server_wide_modules(config, valid_paths):
     print("Searching for server wide modules")
-    all_manifests = get_all_manifests(valid_paths)
+    filters = set(['installable'])
+    all_manifests = find_modules_paths(valid_paths, filters)
 
-    print("Found %s modules" % (len(all_manifests)))
+    print("Found %s installable modules " % (len(all_manifests),))
 
-    manifests = {
-        filename: get_module(filename)
-        for filename in all_manifests
-    }
-
-    installable_manifests = {
-        filename: module
-        for filename, module in manifests.items()
-        if is_installable(module)
-    }
-
-    print("Found %s installable modules " % (len(installable_manifests),))
-
-    server_wide_modules = get_server_wide_modules(installable_manifests)
+    server_wide_modules = get_server_wide_modules(all_manifests)
 
     if len(server_wide_modules) > 2:
         modules = ",".join(server_wide_modules)
@@ -421,6 +288,33 @@ def setup_server_wide_modules(config, valid_paths):
         print("No server wide modules found")
 
     flush_streams()
+
+
+def convert_value(name, value):
+    if value in ['True', 'False']:
+        return value == 'True'
+
+    return value
+
+
+def setup_env_config(config):
+    from odoo.tools import config as odoo_config
+
+    params_by_name = {}
+    for key, opt in odoo_config.casts.items():
+        value_opt = opt.get_opt_string()
+        value_opt = value_opt.upper().replace('--', 'ODOO_')
+        value_opt = value_opt.replace('-', '_')
+        params_by_name[value_opt] = key
+
+    for key, value in os.environ.items():
+        if not key.startswith('ODOO_'):
+            continue
+
+        if key in params_by_name:
+            config_name = params_by_name[key]
+            converted_value = convert_value(key, value)
+            config.set('options', config_name, converted_value)
 
 
 def setup_environ(config):
@@ -514,12 +408,16 @@ def wait_postgresql():
 @contextmanager
 def get_config(config_path):
     config = ConfigParser()
-    config.read(config_path)
+    config.read(str(config_path))
 
     yield config
 
-    with config_path.open('w') as out:
-        config.write(out)
+    try:
+        with config_path.open('w') as out:
+            config.write(out)
+    except Exception:
+        with config_path.open('wb') as out:
+            config.write(out)
 
 
 def is_subdir_of(path1, path2):
@@ -569,6 +467,7 @@ def main():
         setup_environ(config)
         setup_addons_paths(config, valid_paths)
         setup_server_wide_modules(config, valid_paths)
+        setup_env_config(config)
 
     if not os.environ.get('ODOO_SKIP_POSTGRES_WAIT'):
         wait_postgresql()

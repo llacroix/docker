@@ -9,6 +9,22 @@
     filename = "odoo_${ODOO_VERSION}.${ODOO_RELEASE}"
     version_path = "${ODOO_VERSION}"
     module_name = "odoo"
+    base_image = "ubuntu:bionic"
+    os_release = "bionic"
+    python_version = "python3.6"
+    release = ""
+
+    wkhtmltox_repo = "https://github.com/wkhtmltopdf/wkhtmltopdf"
+    wkhtmltox_version = "0.12.5"
+    wkhtmltox_revision = "-1"
+
+    # ARM support
+    # wkhtmltox_repo = "https://github.com/wkhtmltopdf/packaging"
+    #wkhtmltox_version = "0.12.6-1"
+    #wkhtmltox_revision = ""
+
+    odoo_repo = "https://github.com/odoo/odoo.git"
+    ref = ""
 
 [odoo."8.0"]
     version = "8.0"
@@ -35,7 +51,7 @@
 
 [odoo."11.0"]
     version = "11.0"
-    release = "20200623"
+    release = "20201204"
     apt_packages = "ruby-sass"
 
 [odoo."12.0"]

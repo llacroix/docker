@@ -12,6 +12,7 @@ import stat
 from os import path
 from os.path import expanduser
 import shutil
+import six
 
 try:
     from pathlib import Path
@@ -115,20 +116,26 @@ def install_apt_packages():
     for addons_path in paths:
         for packages in addons_path.glob('**/apt-packages.txt'):
             print("Installing packages from %s" % packages)
-            with open(packages, 'r') as pack_file:
-                lines = [line.strip() for line in pack_file]
+            with packages.open('r') as pack_file:
+                lines = [
+                    six.ensure_text(line).strip()
+                    for line in pack_file
+                    if six.ensure_text(line).strip()
+                ]
                 package_list.update(set(lines))
 
     extras = os.environ.get('EXTRA_APT_PACKAGES', '')
-    print(f"Adding extra packages {extras}")
+    print("Adding extra packages {extras}".format(extras=extras))
     if extras:
         for package in extras.split(','):
-            if not package:
+            if not package.strip():
                 continue
-            package_list.add(package)
+            package_list.add(
+                six.ensure_text(package).strip()
+            )
 
     if len(package_list) > 0:
-        print(f"Installing {package_list}")
+        print("Installing {package_list}".format(package_list=package_list))
         ret = pipe(['apt-get', 'update'])
 
         # Something went wrong, stop the service as it's failing
