@@ -85,8 +85,9 @@
 
 [odoo."14.0-nightly"]
     version = "14.0"
-    #filename = "odoo_14.0alpha1.${ODOO_RELEASE}"
-    #version_path = "master"
+    base_image = "ubuntu:focal"
+    os_release = "focal"
+    python_version = "python3.8"
 
 [odoo."14.0-tiny"]
     version = "14.0"
@@ -100,3 +101,9 @@
     release = "20210402"
     filename = "odoo_14.3alpha1.${ODOO_RELEASE}"
     version_path = "master"
+
+[odoo."15.0-nightly"]
+    version = "15.0"
+    base_image = "ubuntu:focal"
+    os_release = "focal"
+    python_version = "python3.8"
