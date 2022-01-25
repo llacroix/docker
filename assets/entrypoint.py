@@ -298,7 +298,10 @@ def convert_value(name, value):
 
 
 def setup_env_config(config):
-    from odoo.tools import config as odoo_config
+    try:
+        from odoo.tools import config as odoo_config
+    except ImportError:
+        from openerp.tools import config as odoo_config
 
     params_by_name = {}
     for key, opt in odoo_config.casts.items():

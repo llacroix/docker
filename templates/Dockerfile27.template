@@ -65,7 +65,8 @@ RUN set -x; \
             odoo-tools \ 
             %(pip_packages)s \
         && odoo-install --release "%(release)s" --version "%(version)s" --repo "%(odoo_repo)s" --ref "%(ref)s" \
-        && cd / \
+        && [ -f /usr/local/bin/odoo.py ] && ln -s /usr/local/bin/odoo.py /usr/local/bin/odoo \
+        || cd / \
         && apt-get --purge remove -y \
             build-essential \
             python2.7-dev \
@@ -78,9 +79,6 @@ RUN set -x; \
         && apt-get autoremove -y \
         && rm -rf /var/lib/apt/lists/* \
         && rm -rf /root/.cache
-
-VOLUME /etc/odoo
-VOLUME /var/lib/odoo
 
 COPY ./%(config)s /etc/odoo/
 COPY ./%(entrypoint)s /
@@ -96,8 +94,11 @@ RUN mkdir /addons \
     && chown -R odoo:odoo /addons \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /sudo-entrypoint.py" >> /etc/sudoers
 
+VOLUME /etc/odoo
+VOLUME /var/lib/odoo
+
 ENV ODOO_RC /etc/odoo/odoo.conf
-ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/odoo/addons
+ENV ODOO_BASE_PATH /usr/local/lib/python2.7/dist-packages/openerp/addons
 # Env variable defined to monitor the kind of service running
 # it could be a staging/production/test or anything and undefined
 # is the default in case we need to know servers that aren't correctly
