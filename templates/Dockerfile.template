@@ -81,9 +81,6 @@ RUN set -x; \
         && rm -rf /var/lib/apt/lists/* \
         && rm -rf /root/.cache
 
-VOLUME /etc/odoo
-VOLUME /var/lib/odoo
-
 COPY ./%(config)s /etc/odoo/
 COPY ./%(entrypoint)s /
 COPY ./sudo-%(entrypoint)s /
@@ -97,6 +94,9 @@ RUN mkdir /addons \
     && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
     && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /sudo-entrypoint.py" >> /etc/sudoers
+
+VOLUME /etc/odoo
+VOLUME /var/lib/odoo
 
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/%(python_version)s/dist-packages/odoo/addons
