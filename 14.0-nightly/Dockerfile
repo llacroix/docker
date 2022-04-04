@@ -37,9 +37,7 @@ RUN set -x; \
 RUN set -x; \
         echo 'deb https://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main' > etc/apt/sources.list.d/pgdg.list \
         && export GNUPGHOME="$(mktemp -d)" \
-        && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
-        && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
-        && gpg --batch --armor --export "${repokey}" > /etc/apt/trusted.gpg.d/pgdg.gpg.asc \
+        && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - \
         && gpgconf --kill all \
         && rm -rf "$GNUPGHOME" \
         && apt-get update  \
