@@ -62,7 +62,7 @@ RUN set -x; \
             git \
         && pip install -U pip \
         && /usr/bin/env pip install \
-            odoo-tools \ 
+            odoo-tools==0.0.65 \ 
             %(pip_packages)s \
         && odoo-install --release "%(release)s" --version "%(version)s" --repo "%(odoo_repo)s" --ref "%(ref)s" \
         && [ -f /usr/local/bin/odoo.py ] && ln -s /usr/local/bin/odoo.py /usr/local/bin/odoo \
@@ -115,11 +115,11 @@ LABEL release="%(release)s"
 
 LABEL org.opencontainers.image.created="%(created_date)s"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
-LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
+LABEL org.opencontainers.image.authors="OdooPlus <info@odoo.plus>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.source="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.version="%(version)s"
-LABEL org.opencontainers.image.vendor="ArcheTI"
+LABEL org.opencontainers.image.vendor="OdooPlus"
 LABEL org.opencontainers.image.ref.name="%(tag)s"
 LABEL org.opencontainers.image.title="Odoo %(version)s"
 LABEL org.opencontainers.image.description="Full featured odoo image that make odoo deployment fun and secure."
