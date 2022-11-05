@@ -18,13 +18,21 @@ RUN set -x; \
             python3-wheel \
             python3-setuptools \
             python3-pip \
+            python3-psycopg2 \
+            python3-ldap \
+            python3-libsass \
+            python3-lxml \
+            python3-pillow \
+            python3-pypdf2 \
+            python3-psutil \
+            python3-asn1crypto \
             curl \
-            libpq-dev \
-            libsasl2-2 \
-            libldap-2.4-2 \
-            libxml2 \
-            libxmlsec1 \
-            libxslt1.1 \
+            # libpq-dev \
+            # libsasl2-2 \
+            # libldap-2.4-2 \
+            # libxml2 \
+            # libxmlsec1 \
+            # libxslt1.1 \
             sudo \
             node-less \
         && echo 'deb https://apt.postgresql.org/pub/repos/apt/ %(os_release)s-pgdg main' > etc/apt/sources.list.d/pgdg.list \
@@ -54,36 +62,36 @@ ARG ODOO_ARCHIVE=%(filename)s.tar.gz
 RUN set -x; \
         apt-get update \
         && apt-get install -y --no-install-recommends \
-            build-essential \
-            %(python_version)s-dev \
-            libsasl2-dev \
-            libldap2-dev %(apt_packages)s \
-            libxml2-dev \
-            libxmlsec1-dev \
-            libxslt1-dev \
+            # build-essential \
+            # %(python_version)s-dev \
+            # libsasl2-dev \
+            # libldap2-dev %(apt_packages)s \
+            # libxml2-dev \
+            # libxmlsec1-dev \
+            # libxslt1-dev \
             git \
         && pip install -U pip \
         && /usr/bin/env pip install \
             odoo-tools \ 
             %(pip_packages)s \
-        && odoo-install --release "%(release)s" --version "%(version)s" --repo "%(odoo_repo)s" --ref "%(ref)s" \
+        && odootools manage setup --release "%(release)s" --repo "%(odoo_repo)s" --ref "%(ref)s" "%(version)s" \
         && cd / \
         && apt-get --purge remove -y \
-            build-essential \
-            %(python_version)s-dev \
-            libsasl2-dev \
-            libldap2-dev \
-            libxml2-dev \
-            libxmlsec1-dev \
-            libxslt1-dev \
+            # build-essential \
+            # %(python_version)s-dev \
+            # libsasl2-dev \
+            # libldap2-dev \
+            # libxml2-dev \
+            # libxmlsec1-dev \
+            # libxslt1-dev \
             git \
         && apt-get autoremove -y \
         && rm -rf /var/lib/apt/lists/* \
         && rm -rf /root/.cache
 
-COPY ./%(config)s /etc/odoo/
-COPY ./%(entrypoint)s /
-COPY ./sudo-%(entrypoint)s /
+#   COPY ./%(config)s /etc/odoo/
+#   COPY ./%(entrypoint)s /
+#   COPY ./sudo-%(entrypoint)s /
 
 ARG UID=%(uid)d
 ARG GID=%(gid)d
@@ -91,14 +99,14 @@ ARG GID=%(gid)d
 RUN mkdir /addons \
     && groupadd -r -g ${GID} odoo \
     && useradd -r -u ${UID} -g odoo -b /var/lib -m odoo \
-    && chown odoo /etc/odoo/odoo.conf \
+    # && chown odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /addons \
-    && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /sudo-entrypoint.py" >> /etc/sudoers
+    && echo "odoo ALL=(ALL:ALL) NOPASSWD:SETENV: /usr/local/bin/odootools" >> /etc/sudoers
 
-VOLUME /etc/odoo
+# VOLUME /etc/odoo
 VOLUME /var/lib/odoo
 
-ENV ODOO_RC /etc/odoo/odoo.conf
+ENV ODOO_RC /var/lib/odoo/odoo.conf
 ENV ODOO_BASE_PATH /usr/local/lib/%(python_version)s/dist-packages/odoo/addons
 # Env variable defined to monitor the kind of service running
 # it could be a staging/production/test or anything and undefined
@@ -116,15 +124,15 @@ LABEL release="%(release)s"
 
 LABEL org.opencontainers.image.created="%(created_date)s"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
-LABEL org.opencontainers.image.authors="Archeti <info@archeti.ca>"
+LABEL org.opencontainers.image.authors="OdooPlus <info@odoo.plus>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.source="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.version="%(version)s"
-LABEL org.opencontainers.image.vendor="ArcheTI"
+LABEL org.opencontainers.image.vendor="OdooPlus"
 LABEL org.opencontainers.image.ref.name="%(tag)s"
 LABEL org.opencontainers.image.title="Odoo %(version)s"
 LABEL org.opencontainers.image.description="Full featured odoo image that make odoo deployment fun and secure."
 
-ENTRYPOINT ["/entrypoint.py"]
+ENTRYPOINT ["odootools", "--log-level", "INFO", "entrypoint", "user"]
 
 cmd ["odoo"]

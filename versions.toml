@@ -11,7 +11,7 @@
     module_name = "odoo"
     base_image = "ubuntu:bionic"
     os_release = "bionic"
-    python_version = "python3.6"
+    python_version = "python3.7"
     release = ""
 
     wkhtmltox_repo = "https://github.com/wkhtmltopdf/wkhtmltopdf"
@@ -44,27 +44,46 @@
 
 [odoo."10.0"]
     version = "10.0"
-    release = "20200313"
+    release = "20201204"
     template = "Dockerfile27.template"
     apt_packages = "ruby-sass"
     pip_packages = "pathlib2"
+    python_version = "python3.6"
 
 [odoo."11.0"]
     version = "11.0"
-    release = "20201204"
+    release = "20210922"
     apt_packages = "ruby-sass"
+    python_version = "python3.6"
 
 [odoo."12.0"]
     version = "12.0"
-    release = "20200623"
+    release = "20211011"
 
 [odoo."13.0"]
     version = "13.0"
-    release = "20200623"
+    release = "20221104"
 
 [odoo."14.0"]
     version = "14.0"
-    release = "20210212"
+    release = "20221104"
+    base_image = "ubuntu:focal"
+    os_release = "focal"
+    python_version = "python3.8"
+
+[odoo."15.0"]
+    version = "15.0"
+    release = "20221104"
+    base_image = "ubuntu:focal"
+    os_release = "focal"
+    python_version = "python3.8"
+
+[odoo."16.0"]
+    version = "16.0"
+    release = "20221104"
+    base_image = "ubuntu:focal"
+    os_release = "focal"
+    python_version = "python3.8"
     #filename = "odoo_14.0alpha1.${ODOO_RELEASE}"
     # version_path = "master"
 
@@ -89,21 +108,14 @@
     os_release = "focal"
     python_version = "python3.8"
 
-[odoo."14.0-tiny"]
-    version = "14.0"
-    release = "20201009"
-    #filename = "odoo_14.0alpha1.${ODOO_RELEASE}"
-    template = "DockerfileTiny.template"
-    #version_path = "master"
-
-[odoo."14.3"]
-    version = "14.3"
-    release = "20210402"
-    filename = "odoo_14.3alpha1.${ODOO_RELEASE}"
-    version_path = "master"
-
 [odoo."15.0-nightly"]
     version = "15.0"
+    base_image = "ubuntu:focal"
+    os_release = "focal"
+    python_version = "python3.8"
+
+[odoo."16.0-nightly"]
+    version = "16.0"
     base_image = "ubuntu:focal"
     os_release = "focal"
     python_version = "python3.8"

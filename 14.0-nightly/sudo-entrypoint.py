@@ -12,6 +12,7 @@ import stat
 from os import path
 from os.path import expanduser
 import shutil
+import six
 
 try:
     from pathlib import Path
@@ -69,6 +70,37 @@ def get_addons_paths():
     ]
 
 
+def get_excluded_paths():
+    excluded_paths = os.environ.get('ODOO_EXCLUDED_PATHS', '')
+    return [
+        Path(x.strip())
+        for x in excluded_paths.split(',')
+        if x
+    ]
+
+
+def is_subdir_of(path1, path2):
+    try:
+        path2.relative_to(path1)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def filter_valid_paths(paths, excluded_paths):
+    res_paths = []
+
+    for cur_path in paths:
+        for ex_path in excluded_paths:
+            if is_subdir_of(ex_path, cur_path):
+                break
+        else:
+            res_paths.append(cur_path)
+
+    return res_paths
+
+
 def install_apt_packages():
     """
     Install debian dependencies.
@@ -76,26 +108,34 @@ def install_apt_packages():
     package_list = set()
 
     paths = get_addons_paths()
+    excluded_paths = get_excluded_paths()
+    paths = filter_valid_paths(paths, excluded_paths)
 
     print("Looking up for packages in {}".format(paths))
 
     for addons_path in paths:
         for packages in addons_path.glob('**/apt-packages.txt'):
             print("Installing packages from %s" % packages)
-            with open(packages, 'r') as pack_file:
-                lines = [line.strip() for line in pack_file]
+            with packages.open('r') as pack_file:
+                lines = [
+                    six.ensure_text(line).strip()
+                    for line in pack_file
+                    if six.ensure_text(line).strip()
+                ]
                 package_list.update(set(lines))
 
     extras = os.environ.get('EXTRA_APT_PACKAGES', '')
-    print(f"Adding extra packages {extras}")
+    print("Adding extra packages {extras}".format(extras=extras))
     if extras:
         for package in extras.split(','):
-            if not package:
+            if not package.strip():
                 continue
-            package_list.add(package)
+            package_list.add(
+                six.ensure_text(package).strip()
+            )
 
     if len(package_list) > 0:
-        print(f"Installing {package_list}")
+        print("Installing {package_list}".format(package_list=package_list))
         ret = pipe(['apt-get', 'update'])
 
         # Something went wrong, stop the service as it's failing

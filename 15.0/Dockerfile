@@ -56,7 +56,7 @@ RUN set -x; \
 
 ENV PATH=/var/lib/odoo/.local/bin:/usr/local/bin:$PATH
 # Install Odoo Including things from sources
-ENV ODOO_VERSION 14.0
+ENV ODOO_VERSION 15.0
 ENV ODOO_RELEASE=20221104
 ARG ODOO_ARCHIVE=odoo_${ODOO_VERSION}.${ODOO_RELEASE}.tar.gz
 RUN set -x; \
@@ -74,7 +74,7 @@ RUN set -x; \
         && /usr/bin/env pip install \
             odoo-tools \ 
              \
-        && odootools manage setup --release "20221104" --repo "https://github.com/odoo/odoo.git" --ref "" "14.0" \
+        && odootools manage setup --release "20221104" --repo "https://github.com/odoo/odoo.git" --ref "" "15.0" \
         && cd / \
         && apt-get --purge remove -y \
             # build-essential \
@@ -119,18 +119,18 @@ expose 8071
 
 USER odoo
 
-LABEL version="14.0"
+LABEL version="15.0"
 LABEL release="20221104"
 
-LABEL org.opencontainers.image.created="2022-11-04T20:06:13.804232"
+LABEL org.opencontainers.image.created="2022-11-04T20:06:13.805177"
 LABEL org.opencontainers.image.url="https://hub.docker.com/r/llacroix/odoo"
 LABEL org.opencontainers.image.authors="OdooPlus <info@odoo.plus>"
 LABEL org.opencontainers.image.documentation="https://github.com/llacroix/odoo-docker"
 LABEL org.opencontainers.image.source="https://github.com/llacroix/odoo-docker"
-LABEL org.opencontainers.image.version="14.0"
+LABEL org.opencontainers.image.version="15.0"
 LABEL org.opencontainers.image.vendor="OdooPlus"
-LABEL org.opencontainers.image.ref.name="14.0"
-LABEL org.opencontainers.image.title="Odoo 14.0"
+LABEL org.opencontainers.image.ref.name="15.0"
+LABEL org.opencontainers.image.title="Odoo 15.0"
 LABEL org.opencontainers.image.description="Full featured odoo image that make odoo deployment fun and secure."
 
 ENTRYPOINT ["odootools", "--log-level", "INFO", "entrypoint", "user"]
